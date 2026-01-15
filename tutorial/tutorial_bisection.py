@@ -11,4 +11,4 @@ if __name__ == "__main__":
     tol = 1e-2
     x = na.NLE.bisection(I,ff, tol=tol)
     print("The root is:",x)
-    print("Check f(root):",ff(x))
+    print("absulate error:", 0.0 - ff(x))
