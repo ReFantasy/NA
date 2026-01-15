@@ -1,0 +1,10 @@
+[project]
+name = "na"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "jax>=0.8.2",
+    "warp-lang>=1.11.0",
+]
