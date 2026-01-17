@@ -28,4 +28,4 @@ if __name__ == "__main__":
     x = [0.1,0.1]
     jnp_xn = na.NLE.newtons(ff_vec, x0=x, tol=1e-4)
     print("The root is:",jnp_xn)
-    print("absolute error:", np.array(ff_vec(jnp_xn)))
+    print("absolute error:", -np.array(ff_vec(jnp_xn)))
