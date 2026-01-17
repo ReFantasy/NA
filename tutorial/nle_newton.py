@@ -17,17 +17,18 @@ def ff_vec(x):
     return [v1, v2]
 
 if __name__ == "__main__":
-    # print("Using Newton's method:")
-    # x = na.NLE.newton(ff, x0=1.5, tol=1e-4)
-    # print("The root is:",x)
-    # print("absulate error:", 0.0 - ff(x))
-    #
-    # print("\nUsing Multi-point Newton's method:")
-    # x = na.NLE.newton_mp(ff, x0=1.5, x1 = 1.6, tol=1e-4)
-    # print("The root is:",x)
-    # print("absulate error:", 0.0 - ff(x))
+    print("Using Newton's method solve single nonlinear equation")
+    x = na.NLE.newton(ff, x0=1.5, tol=1e-4)
+    print("The root is:",x)
+    print("absolute error:", 0.0 - ff(x))
 
+    print("\nUsing Multi-point Newton's method solve single nonlinear equation")
+    x = na.NLE.newton_mp(ff, x0=1.5, x1 = 1.6, tol=1e-4)
+    print("The root is:",x)
+    print("absolute error:", 0.0 - ff(x))
+
+    print("\nUsing Newton's method solve systems of nonlinear equations")
     x = [0.1,0.1]
     jnp_xn = na.NLE.newtons(ff_vec, x0=x, tol=1e-4)
     print("The root is:",jnp_xn)
-    print("absulate error:", np.array(ff_vec(jnp_xn)))
+    print("absolute error:", np.array(ff_vec(jnp_xn)))

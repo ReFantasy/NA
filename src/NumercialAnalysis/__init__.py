@@ -1,3 +1,6 @@
+import os
+os.environ['NPY_FLOAT_PRECISION'] = '64'
+
 import jax
 jax.config.update("jax_platforms", "cpu")
 jax.config.update("jax_enable_x64", True)

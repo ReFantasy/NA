@@ -15,19 +15,39 @@ def newton(func, x0, tol):
         xk_n = xk_c - func(xk_c) / grad_f(xk_c)
     return xk_n
 
+# def newton_mp(func, x0, x1,  tol):
+#     """
+#     Multi-point Newton's method
+#     """
+#     def gx(func,x0, x1):
+#         return x1 - (x1-x0)/(func(x1)-func(x0)) * func(x1)
+#     xk_p = x0
+#     xk_c = x1
+#     xk_n = gx(func, xk_p, xk_c)
+#     while abs(xk_n - xk_c) > tol:
+#         xk_p = xk_c
+#         xk_c = xk_n
+#         xk_n = gx(func, xk_p, xk_c)
+#     return xk_n
+
 def newton_mp(func, x0, x1,  tol):
     """
     Multi-point Newton's method
     """
-    def gx(func,x0, x1):
-        return x1 - (x1-x0)/(func(x1)-func(x0)) * func(x1)
+    def jax_func(x):
+        return jnp.array(func(x))
+    
+    def gx(f,x0, x1):
+        return x1 - (x1-x0)/(f(x1)-f(x0)) * f(x1)
+    x0 = jnp.array(x0)
+    x1 = jnp.array(x1)
     xk_p = x0
     xk_c = x1
-    xk_n = gx(func, xk_p, xk_c)
+    xk_n = gx(jax_func, xk_p, xk_c)
     while abs(xk_n - xk_c) > tol:
         xk_p = xk_c
         xk_c = xk_n
-        xk_n = gx(func, xk_p, xk_c)
+        xk_n = gx(jax_func, xk_p, xk_c)
     return xk_n
 
 def newtons(func, x0, tol):
