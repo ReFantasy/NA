@@ -4,6 +4,9 @@ from jax import grad, jacrev
 import jax.numpy as jnp
 
 def newton(func, x0, tol):
+    """
+    Newton's method for single nonlinear equation
+    """
     grad_f = jax.jit(grad(func))
     xk_c = x0
     xk_n = x0 - func(xk_c) / grad_f(xk_c)
@@ -11,7 +14,6 @@ def newton(func, x0, tol):
         xk_c = xk_n
         xk_n = xk_c - func(xk_c) / grad_f(xk_c)
     return xk_n
-
 
 def newton_mp(func, x0, x1,  tol):
     """
@@ -28,22 +30,10 @@ def newton_mp(func, x0, x1,  tol):
         xk_n = gx(func, xk_p, xk_c)
     return xk_n
 
-# def newtons(func, x0, tol):
-#     grad_f = jacrev(func)
-#     xk_c = jnp.array(x0)
-#
-#     H = jnp.array(grad_f(xk_c))
-#     H_inv = jnp.linalg.inv(H)
-#     xk_n = jnp.array(x0) - H_inv@ jnp.array(func(xk_c)) 
-#
-#     while jnp.linalg.norm(xk_n - xk_c) > tol:
-#         xk_c = xk_n
-#         H = jnp.array(grad_f(xk_c))
-#         H_inv = jnp.linalg.inv(H)
-#         xk_n = xk_c - H_inv@jnp.array(func(xk_c)) 
-#     return xk_n
-
 def newtons(func, x0, tol):
+    """
+    Newton's method for systems of nonlinear equations
+    """
     def jax_func(x):
         return jnp.array(func(x))
     x0 = jnp.array(x0)

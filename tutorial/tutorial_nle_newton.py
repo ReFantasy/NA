@@ -27,7 +27,7 @@ if __name__ == "__main__":
     # print("The root is:",x)
     # print("absulate error:", 0.0 - ff(x))
 
-    x = [1.0,1.0]
+    x = [0.1,0.1]
     jnp_xn = na.NLE.newtons(ff_vec, x0=x, tol=1e-4)
     print("The root is:",jnp_xn)
     print("absulate error:", np.array(ff_vec(jnp_xn)))
