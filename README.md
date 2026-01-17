@@ -1,6 +1,13 @@
 # NA
 数值分析 Python 实现
 
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+python tutorial/nle_newton.py
+```
+
 Install [uv](https://docs.astral.sh/uv/)
 
 ```bash
