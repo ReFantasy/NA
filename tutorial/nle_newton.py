@@ -9,11 +9,8 @@ def ff(x):
 def ff_vec(x):
     x1 = x[0]
     x2 = x[1]
-    
     v1 = 4*x1**2 + 3*x2**2 -1
     v2 = x1**3 -8*x2**3 -1
-    # return np.array([v1, v2])
-    # return jnp.array([v1, v2])
     return [v1, v2]
 
 if __name__ == "__main__":
