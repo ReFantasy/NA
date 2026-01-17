@@ -6,5 +6,5 @@ Install [uv](https://docs.astral.sh/uv/)
 ```bash
 uv venv 
 uv pip install -e .
-uv run tutorial/tutorial_bisection.py
+uv run tutorial/bisection.py
 ```
