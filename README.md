@@ -4,6 +4,7 @@
 Install [uv](https://docs.astral.sh/uv/)
 
 ```plain
-uv venv && uv pip install -e .
+uv venv 
+uv pip install -e .
 uv run example/nle_newton.py
 ```
