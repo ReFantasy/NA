@@ -3,7 +3,7 @@
 ## Build
 Install [uv](https://docs.astral.sh/uv/)
 
-```bash
+```plain
 uv venv && uv pip install -e .
 uv run example/nle_newton.py
 ```
