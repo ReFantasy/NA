@@ -1,7 +1,5 @@
 import NumercialAnalysis as na
 import numpy as np
-from jax import grad, hessian, jacfwd, jacrev
-import jax.numpy as jnp
 
 def ff(x):
     return 2*x*x*x - 5*x -1
