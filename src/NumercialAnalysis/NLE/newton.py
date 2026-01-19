@@ -3,6 +3,7 @@ from functools import singledispatch
 from jax import grad, jacrev, jacfwd
 import jax.numpy as jnp
 
+
 def newton(func, x0, tol):
     """
     Newton's method for single nonlinear equation
@@ -15,15 +16,18 @@ def newton(func, x0, tol):
         xk_n = xk_c - func(xk_c) / grad_f(xk_c)
     return xk_n
 
-def newton_mp(func, x0, x1,  tol):
+
+def newton_mp(func, x0, x1, tol):
     """
     Multi-point Newton's method
     """
+
     def jax_func(x):
         return jnp.array(func(x))
-    
-    def gx(f,x0, x1):
-        return x1 - (x1-x0)/(f(x1)-f(x0)) * f(x1)
+
+    def gx(f, x0, x1):
+        return x1 - (x1 - x0) / (f(x1) - f(x0)) * f(x1)
+
     x0 = jnp.array(x0)
     x1 = jnp.array(x1)
     xk_p = x0
@@ -35,12 +39,15 @@ def newton_mp(func, x0, x1,  tol):
         xk_n = gx(jax_func, xk_p, xk_c)
     return xk_n
 
+
 def newtons(func, x0, tol):
     """
     Newton's method for systems of nonlinear equations
     """
+
     def jax_func(x):
         return jnp.array(func(x))
+
     x0 = jnp.array(x0)
 
     grad_f = jax.jit(jacrev(jax_func))
@@ -48,11 +55,11 @@ def newtons(func, x0, tol):
 
     H = grad_f(xk_c)
     H_inv = jnp.linalg.inv(H)
-    xk_n = x0 - H_inv@ jax_func(xk_c) 
+    xk_n = x0 - H_inv @ jax_func(xk_c)
 
     while jnp.linalg.norm(xk_n - xk_c) > tol:
         xk_c = xk_n
         H = grad_f(xk_c)
         H_inv = jnp.linalg.inv(H)
-        xk_n = xk_c - H_inv@jax_func(xk_c) 
+        xk_n = xk_c - H_inv @ jax_func(xk_c)
     return xk_n
