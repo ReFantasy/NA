@@ -1,9 +1,13 @@
 import NumercialAnalysis as na
-import numpy as np
+import jax.numpy as jnp
 
 
 def ff(x):
     return 2 * x * x * x - 5 * x - 1
+
+
+def ff2(x):
+    return x - 2 * jnp.cos(x)
 
 
 def ff_vec(x):
@@ -29,4 +33,9 @@ if __name__ == "__main__":
     x = [0.1, 0.1]
     jnp_xn = na.NLE.newtons(ff_vec, x0=x, tol=1e-4)
     print("The root is:", jnp_xn)
-    print("absolute error:", -np.array(ff_vec(jnp_xn)))
+    print("absolute error:", -jnp.array(ff_vec(jnp_xn)))
+
+    ## 书后数值实验
+    # print("----------------------------------------------")
+    # print(na.NLE.newton(ff2, x0=1.0, tol=1e-4))
+    # print(na.NLE.newton_mp(ff2, x0=1, x1=1.1, tol=1e-4))
