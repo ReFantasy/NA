@@ -1,6 +1,5 @@
 import jax
-from functools import singledispatch
-from jax import grad, jacrev, jacfwd
+from jax import grad, jacrev
 import jax.numpy as jnp
 
 
