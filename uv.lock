@@ -107,7 +107,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "jax", specifier = ">=0.8.2" }]
+requires-dist = [{ name = "jax" }]
 
 [[package]]
 name = "numpy"
