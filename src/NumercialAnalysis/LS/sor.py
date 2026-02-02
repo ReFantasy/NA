@@ -15,8 +15,10 @@ def sor(A: jnp.array, b: jnp.array, w, tol, x0: jnp.array = None):
 
     if x0 == None:
         x0 = jnp.zeros(len(b))
+
     x_pre = x0
     x = Bw @ x_pre + gw
+
     info = Info(current_iter=1)
     while jnp.linalg.norm(x - x_pre, ord=jnp.inf) > tol:
         x_pre = x

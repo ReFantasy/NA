@@ -15,4 +15,4 @@ if __name__ == "__main__":
     print(f"seidel solution: {x} number of iter: {info.current_iter}")
 
     x, info = na.LS.sor(A, b, w=0.8, tol=tol)
-    print(f"sor solution: {x} number of iter: {info.current_iter}")
+    print(f"sor    solution: {x} number of iter: {info.current_iter}")
