@@ -30,10 +30,10 @@ def is_converged(A: jnp.ndarray, B: jnp.ndarray, method: string = "Jacobi") -> b
     if jnp.linalg.norm(B, ord="f") < 1:
         return True
     if method == "Jacobi":
-        if na.is_strictly_diagonally_dominant(A):
+        if na.is_sdd(A):
             return True
     if method == "Seidel":
-        if na.is_strictly_diagonally_dominant(A):
+        if na.is_sdd(A):
             return True
     logger.warning("{} method may not converge!", method)
     return False
