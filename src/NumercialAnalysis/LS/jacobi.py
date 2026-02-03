@@ -1,5 +1,5 @@
 import jax.numpy as jnp
-from NumercialAnalysis.LS import Info
+from .util import Info
 
 
 def jacobi(A: jnp.array, b: jnp.array, tol, x0: jnp.array = None):

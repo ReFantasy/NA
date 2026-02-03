@@ -1,5 +1,5 @@
 import jax.numpy as jnp
-from NumercialAnalysis.LS import Info
+from .util import Info
 
 
 def sor(A: jnp.array, b: jnp.array, w, tol, x0: jnp.array = None):
