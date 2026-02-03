@@ -1,10 +1,8 @@
 import jax.numpy as jnp
-from .util import Info
+from .util import *
 
 
 def sor(A: jnp.array, b: jnp.array, w, tol, x0: jnp.array = None):
-    # TODO 判断是否收敛
-
     U = jnp.triu(A)
     L = jnp.tril(A)
     D = A + L + U
@@ -12,6 +10,9 @@ def sor(A: jnp.array, b: jnp.array, w, tol, x0: jnp.array = None):
     D_wL_inv = jnp.linalg.inv(D - w * L)
     Bw = D_wL_inv @ ((1.0 - w) * D + w * U)
     gw = w * D_wL_inv @ b
+
+    # 收敛警告
+    is_converged(A, Bw, method="Sor")
 
     if x0 == None:
         x0 = jnp.zeros(len(b))

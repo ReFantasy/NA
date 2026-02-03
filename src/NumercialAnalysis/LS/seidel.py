@@ -1,10 +1,8 @@
 import jax.numpy as jnp
-from .util import Info
+from .util import *
 
 
 def seidel(A: jnp.array, b: jnp.array, tol, x0: jnp.array = None):
-    # TODO 判断是否收敛
-
     U = jnp.triu(A)
     L = jnp.tril(A)
     D = A + L + U
@@ -12,6 +10,9 @@ def seidel(A: jnp.array, b: jnp.array, tol, x0: jnp.array = None):
     D_L_inv = jnp.linalg.inv(D - L)
     BS = D_L_inv @ U
     gS = D_L_inv @ b
+
+    # 收敛警告
+    is_converged(A, BS, method="Seidel")
 
     if x0 == None:
         x0 = jnp.zeros(len(b))
