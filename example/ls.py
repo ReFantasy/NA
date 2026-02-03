@@ -1,6 +1,5 @@
 import NumercialAnalysis as na
 import jax.numpy as jnp
-import numpy as np
 
 if __name__ == "__main__":
     A = jnp.array([[5, 2, 1], [-1, 4, 2], [2, -3, 10]])
