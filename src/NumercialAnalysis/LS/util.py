@@ -20,7 +20,7 @@ class Info:
     #     return self.age >= 18
 
 
-def is_converged(A: jnp.ndarray, B: jnp.ndarray, method: string = "Jacobi") -> bool:
+def is_converged(A: jnp.ndarray, B: jnp.ndarray, method: str = "Jacobi") -> bool:
     if jnp.linalg.norm(B, ord=jnp.inf) < 1:
         return True
     if jnp.linalg.norm(B, ord=1) < 1:
