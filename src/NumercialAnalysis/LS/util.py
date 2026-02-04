@@ -1,5 +1,3 @@
-from math import log
-import string
 import jax.numpy as jnp
 from dataclasses import dataclass
 import NumercialAnalysis as na
