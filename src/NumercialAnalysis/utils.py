@@ -3,7 +3,8 @@ import jax.numpy as jnp
 
 # 判断对角占优矩阵
 def is_sdd(A: jnp.ndarray) -> jnp.ndarray:
-    """Determine whether a matrix is strictly diagonally dominant.
+    """
+    Determine whether a matrix is strictly diagonally dominant.
     Definition: For each row i, |a_ii| > sum_{j!=i} |a_ij|;
                 For each column i, |a_ii| > sum_{j!=i} |a_ji|.
     Parameters:
