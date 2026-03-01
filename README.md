@@ -1,7 +1,7 @@
 # NumericalAnalysis(NA)
 数值分析 Python 实现
 ## Build and Run
-安装 <a href="https://uv.doczh.com" target="_blank">uv</a>
+安装 [uv](https://uv.doczh.com) 
 
 ```plain
 uv venv 
