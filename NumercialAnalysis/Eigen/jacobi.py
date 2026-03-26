@@ -67,8 +67,16 @@ def passby_jacobi(A: jnp.array, tol: float = 1e-12, scale: float = 0.5):
                     c = jnp.cos(theta_k)
                     s = jnp.sin(theta_k)
                     J = jnp.eye(A.shape[0])
-                    J = J.at[p, p].set(c).at[q, q].set(c).at[p, q].set(-s).at[q, p].set(s)
-                    
+                    J = (
+                        J.at[p, p]
+                        .set(c)
+                        .at[q, q]
+                        .set(c)
+                        .at[p, q]
+                        .set(-s)
+                        .at[q, p]
+                        .set(s)
+                    )
 
                     # 更新矩阵和特征向量
                     Q = Q @ J
