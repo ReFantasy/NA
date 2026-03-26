@@ -4,7 +4,7 @@
 安装 [uv](https://uv.doczh.com) 
 
 ```plain
-uv venv 
+uv sync
 uv pip install -e .
 uv run example/nle_newton.py
 ```
