@@ -1,7 +1,7 @@
 import jax.numpy as jnp
 
 
-def jacobi(A: jnp.array, tol: float = 1e-8):
+def jacobi(A: jnp.array, tol: float = 1e-12):
     # 检查输入矩阵是否为实对称矩阵
     if not jnp.allclose(A, jnp.transpose(A)):
         raise ValueError("Input matrix must be symmetric.")
