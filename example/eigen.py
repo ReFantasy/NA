@@ -30,16 +30,16 @@ if __name__ == "__main__":
   
     
     #Q, lam = na.Eigen.jacobi(A, tol=10e-5)
-    Q, lam = na.Eigen.passby_jacobi(A, tol=10e-5)
+    # Q, lam = na.Eigen.passby_jacobi(A, tol=10e-5)
    
-    print("Eigenvalues:\n", lam)
-    print("Eigenvectors (columns of Q):\n", Q)
+    # print("Eigenvalues:\n", lam)
+    # print("Eigenvectors (columns of Q):\n", Q)
     
     # print("Check error")
     # for i in range(3):
     #     print(Q[:,i] * lam[i] - A @ Q[:,i])
 
-    # compute_time()
+    compute_time()
 
     
   
