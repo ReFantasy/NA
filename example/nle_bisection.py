@@ -1,4 +1,4 @@
-import NumercialAnalysis as na
+import NumericalAnalysis as na
 
 
 def ff(x):

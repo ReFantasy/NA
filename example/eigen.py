@@ -1,4 +1,4 @@
-import NumercialAnalysis as na
+import NumericalAnalysis as na
 import jax.numpy as jnp
 import jax
 import time

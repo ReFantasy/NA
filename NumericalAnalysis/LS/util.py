@@ -1,6 +1,6 @@
 import jax.numpy as jnp
 from dataclasses import dataclass
-import NumercialAnalysis as na
+import NumericalAnalysis as na
 from loguru import logger
 
 # from typing import Optional
