@@ -1,13 +1,24 @@
-def chase(f, x_init, h):
+def chase(func: callable, x_init: float, h: float):
+    """
+    区间追赶法（进退法），用于在一维搜索中寻找单峰区间。
+
+    参数:
+        f (callable): 目标函数。
+        x_init (float): 搜索的初始点。
+        h (float): 初始探索步长。
+
+    返回:
+        tuple (float, float, int): 返回包含极小值点的区间端点 (x_left, x_right) 以及迭代次数 k。
+    """
     x1, x2 = x_init, x_init + h
-    fx1, fx2 = f(x1), f(x2)
+    fx1, fx2 = func(x1), func(x2)
     k = 0
 
     if fx1 > fx2:
         while True:
             k += 1
             x3 = x2 + h
-            fx3 = f(x3)
+            fx3 = func(x3)
             if fx2 > fx3:
                 x1, x2 = x2, x3
             else:
@@ -18,7 +29,7 @@ def chase(f, x_init, h):
         while True:
             k += 1
             x1 = x2 - h
-            fx1 = f(x1)
+            fx1 = func(x1)
             if fx2 < fx1:
                 return x1, x3, k
             else:
