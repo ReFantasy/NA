@@ -1,5 +1,32 @@
+"""
+黄金分割法线搜索模块。
+
+包含一维线性搜索的黄金分割算法实现。
+
+Author:
+    LONG QIANG (Created on Thu Mar 24 19:05:38 2022)
+
+Revisions:
+    2026-04-06 [ReFantasy]: 为 Golden 函数新增 objfun (callable) 参数以传入目标函数，方便外部调用和复用
+"""
+
+
 ## 黄金分割法
 def Golden(objfun: callable, a: float, b: float, epsilon: float) -> tuple[float, float, int]:
+    """
+    使用黄金分割法（0.618法）求解一元函数在给定区间内的极小值点。
+
+    Args:
+    ----------
+        objfun (callable): 目标函数。
+        a (float): 初始搜索区间的左端点。
+        b (float): 初始搜索区间的右端点。
+        epsilon (float): 容许误差，用于控制算法精度。
+
+    Returns:
+    ----------
+        tuple[float, float, int]: 包含近似极小值点 xstar、对应的函数极小值 fstar 以及迭代次数 k 的元组。
+    """
     # 初始化
     ak = a  # 初始区间左端点
     bk = b  # 初始区间右端点

@@ -1,14 +1,22 @@
 def chase(func: callable, x_init: float, h: float):
     """
-    区间追赶法（进退法），用于在一维搜索中寻找单峰区间。
+    使用进退法（Bounding Phase Method）寻找一元函数的极小值包含区间。
+    作者: LONG QIANG (Created on Thu Mar 24 19:05:38 2022)
+    通过不断步进试探，找到一个呈现“高-低-高”形态的区间，该区间必定包含极小值点。
 
-    参数:
-        f (callable): 目标函数。
-        x_init (float): 搜索的初始点。
-        h (float): 初始探索步长。
+    参数
+    ----------
+    func : callable
+        目标函数。
+    x_init : float
+        初始搜索点。
+    h : float
+        初始搜索步长。
 
-    返回:
-        tuple (float, float, int): 返回包含极小值点的区间端点 (x_left, x_right) 以及迭代次数 k。
+    返回
+    -------
+    tuple[float, float, int]
+        包含极小值点的区间端点 x1, x3，以及迭代次数 k。
     """
     x1, x2 = x_init, x_init + h
     fx1, fx2 = func(x1), func(x2)
