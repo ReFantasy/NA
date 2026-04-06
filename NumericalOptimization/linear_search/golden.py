@@ -14,7 +14,7 @@ Revisions:
 ## 黄金分割法
 def Golden(objfun: callable, a: float, b: float, epsilon: float) -> tuple[float, float, int]:
     """
-    使用黄金分割法（0.618法）求解一元函数在给定区间内的极小值点。
+    [精确线性搜索] 使用黄金分割法（0.618法）求解一元函数在给定区间内的极小值点。
 
     Args:
     ----------

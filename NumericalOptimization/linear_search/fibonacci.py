@@ -24,7 +24,7 @@ def fibonacci_sequence(a, b, epsilon):
 ## 斐波拉契法线搜索
 def fibonacci(objfun: callable, a: float, b: float, epsilon: float):
     """
-    使用斐波那契搜索法寻找一元函数在给定区间 [a, b] 上的极小点。
+    [精确线性搜索] 使用斐波那契搜索法寻找一元函数在给定区间 [a, b] 上的极小点。
 
     参数:
     ----------
