@@ -1,4 +1,4 @@
-def chase(func: callable, x_init: float, h: float):
+def chase(objfun: callable, x_init: float, h: float):
     """
     使用进退法（Bounding Phase Method）寻找一元函数的极小值包含区间。
     作者: LONG QIANG (Created on Thu Mar 24 19:05:38 2022)
@@ -19,16 +19,17 @@ def chase(func: callable, x_init: float, h: float):
         包含极小值点的区间端点 x1, x3，以及迭代次数 k。
     """
     x1, x2 = x_init, x_init + h
-    fx1, fx2 = func(x1), func(x2)
+    fx1, fx2 = objfun(x1), objfun(x2)
     k = 0
 
     if fx1 > fx2:
         while True:
             k += 1
             x3 = x2 + h
-            fx3 = func(x3)
+            fx3 = objfun(x3)
             if fx2 > fx3:
                 x1, x2 = x2, x3
+                fx1, fx2 = fx2, fx3
             else:
                 return x1, x3, k
     else:
@@ -37,7 +38,7 @@ def chase(func: callable, x_init: float, h: float):
         while True:
             k += 1
             x1 = x2 - h
-            fx1 = func(x1)
+            fx1 = objfun(x1)
             if fx2 < fx1:
                 return x1, x3, k
             else:

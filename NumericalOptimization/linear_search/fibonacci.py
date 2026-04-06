@@ -51,7 +51,7 @@ def fibonacci(objfun: callable, a: float, b: float, epsilon: float):
 
     # 迭代过程
     while True:
-        # print(k, ak, bk, bk - ak)
+        # print(k,ak,bk,bk-ak)
         if bk - ak <= epsilon:  # 终止条件判断
             xstar = (ak + bk) / 2
             fstar = objfun(xstar)
