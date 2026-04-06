@@ -1,5 +1,4 @@
 import NumericalOptimization
-from NumericalOptimization.utils import chase
 import NumericalOptimization as optimizer
 import math
 import jax
@@ -18,7 +17,7 @@ def objfun(x):
 
 if __name__ == "__main__":
 
-    x1, x3, k = chase(objfun, -0.6, 0.4)
+    x1, x3, k = NumericalOptimization.utils.chase(objfun, -0.6, 0.4)
 
     print(x1, x3, k)
     x_star, y_star, _ = optimizer.linear_search.Golden(objfun, x1, x3, 1e-8)
