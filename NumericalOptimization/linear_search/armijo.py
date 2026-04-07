@@ -19,37 +19,23 @@ Revisions:
                                         alphal = (al + bl) / 2.0
 """
 
-#import numpy as np
 import sys
-import jax 
+import jax
 import jax.numpy as jnp
 
 
-## 原问题目标函数
-# def objfun(x):
-#     y = (x[0] - 1) ** 2 + (x[1] + 1) ** 2
-#     return y
-
-
-##原问题目标函数的梯度函数
-def gradfun(x):
-    y = jnp.array([2 * (x[0] - 1), 2 * (x[1] + 1)])
-    return y
-
-
-## 一维搜索目标函数
-# def phi(xk, dk, alpha):
-#     y = objfun(xk + alpha * dk)
-#     return y
-
-
 ## Armijo-Goldstein步长准则
-def Armijo_Goldstein(objfun, xk, dk, a0, b0=sys.float_info.max, alpha0=1.0):
+def Armijo_Goldstein(objfun, xk, dk, a0=0.0, b0=sys.float_info.max, alpha0=1.0, rho=0.3, t=1.1):
+    gradfun = jax.grad(objfun)
+
     def phi(xk, dk, alpha):
         y = objfun(xk + alpha * dk)
         return y
 
-    rho, t = 0.3, 1.1
+    assert 0 < rho < 0.5, "rho must be in (0, 1)"
+    assert t > 1.0, "t must be greater than 1"
+    assert a0 < alpha0 < b0, "alpha0 must be in (a0, b0)"
+
     al, bl, alphal = a0, b0, alpha0
     l = 0
 
@@ -60,22 +46,10 @@ def Armijo_Goldstein(objfun, xk, dk, a0, b0=sys.float_info.max, alpha0=1.0):
                 return alphal, l, error
             else:
                 al = alphal
-                ########################################
-                # delete
-                ########################################
-                # if bl < 100.0:
-                #     alphal = (al + bl) / 2.0
-                # else:
-                #     alphal = t * alphal
-                ########################################
 
-                ########################################
-                # new
-                ########################################
                 if phi(xk, dk, alphal) < objfun(xk) + (1 - rho) * jnp.dot(gradfun(xk), dk) * alphal:
                     bl = bl * t
                 alphal = (al + bl) / 2.0
-                ########################################
 
                 l += 1
                 continue
@@ -88,21 +62,25 @@ def Armijo_Goldstein(objfun, xk, dk, a0, b0=sys.float_info.max, alpha0=1.0):
 
 ## 主函数
 if __name__ == "__main__":
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
 
     def objfun(x):
         y = (x[0] - 1) ** 2 + (x[1] + 1) ** 2
         return y
-    
+
+    gradfun = jax.grad(objfun)
+
     # 输入
-    xk = jnp.array([0, 0])  # 原目标函数当前跌点
+    xk = jnp.array([0.0, 0.0])  # 原目标函数当前跌点
     dk = -gradfun(xk)  # 当前搜索方向
-  
-    a0,b0,alpha0 = 0.,20.,10.   # 初始区间和初始试探点 Armijo-Goldstein步长准则:  (0.625, 4, np.float64(1.875))
-    #a0, b0, alpha0 = 0.0, 0.00001, 0.0000001  # 初始区间和初始试探点
 
-    # Armijo-Goldstein步长准则
-    print("Armijo-Goldstein步长准则: ", Armijo_Goldstein(objfun, xk, dk, a0, b0, alpha0))
+    a0, b0, alpha0 = 0.0, 20.0, 10.0  # 初始区间和初始试探点 Armijo-Goldstein步长准则:  (0.625, 4, np.float64(1.875))
+    # a0, b0, alpha0 = 0.0, 0.00001, 0.0000001  # 初始区间和初始试探点
 
-    # print( 10< float('inf') )
-    # print( sys.float_info.max )
+    alphal, l, error = Armijo_Goldstein(objfun, xk, dk, a0, b0, alpha0)
+    print("Armijo-Goldstein步长准则: ", alphal, l, error)
 
+    # alphal, l, error = Armijo_Goldstein(objfun, xk, dk)
+    # print("Armijo-Goldstein步长准则: ", alphal, l, error)
