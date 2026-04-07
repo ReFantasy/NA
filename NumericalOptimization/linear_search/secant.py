@@ -2,9 +2,10 @@ from jax import grad
 
 
 ## 割线法
-def Secant(objfun: callable, a: float, b: float, epsilon: float):
+def secant(objfun: callable, a: float, b: float, epsilon: float, gradfun=None):
     # automatically compute the gradient of the objective function
-    gradfun = grad(objfun)
+    if gradfun == None:
+        gradfun = grad(objfun)
 
     xk_1, xk = a, b
     k = 0
@@ -38,5 +39,5 @@ if __name__ == "__main__":
     epsilon = 0.00001  # 容忍精度
 
     # 割线法
-    xstar, fstar, k = Secant(objfun, a, b, epsilon)
+    xstar, fstar, k = secant(objfun, a, b, epsilon)
     print("Secant: ", xstar, fstar, k)

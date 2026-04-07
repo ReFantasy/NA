@@ -12,7 +12,7 @@ Revisions:
 
 
 ## 黄金分割法
-def Golden(objfun: callable, a: float, b: float, epsilon: float) -> tuple[float, float, int]:
+def golden(objfun: callable, a: float, b: float, epsilon: float) -> tuple[float, float, int]:
     """
     [精确线性搜索] 使用黄金分割法（0.618法）求解一元函数在给定区间内的极小值点。
 
@@ -74,5 +74,5 @@ if __name__ == "__main__":
     epsilon = 0.1  # 容忍精度
 
     # 黄金分割法
-    xstar, fstar, k = Golden(objfun, a, b, epsilon)
+    xstar, fstar, k = golden(objfun, a, b, epsilon)
     print("Golden Method: ", xstar, fstar, k)

@@ -25,8 +25,9 @@ import jax.numpy as jnp
 
 
 ## Armijo-Goldstein步长准则
-def Armijo_Goldstein(objfun, xk, dk, a0=0.0, b0=sys.float_info.max, alpha0=1.0, rho=0.3, t=1.1):
-    gradfun = jax.grad(objfun)
+def armijo_goldstein(objfun, xk, dk, a0=0.0, b0=sys.float_info.max, alpha0=1.0, rho=0.3, t=1.1, gradfun=None):
+    if gradfun == None:
+        gradfun = jax.grad(objfun)
 
     def phi(xk, dk, alpha):
         y = objfun(xk + alpha * dk)
@@ -79,7 +80,7 @@ if __name__ == "__main__":
     a0, b0, alpha0 = 0.0, 20.0, 10.0  # 初始区间和初始试探点 Armijo-Goldstein步长准则:  (0.625, 4, np.float64(1.875))
     # a0, b0, alpha0 = 0.0, 0.00001, 0.0000001  # 初始区间和初始试探点
 
-    alphal, l, error = Armijo_Goldstein(objfun, xk, dk, a0, b0, alpha0)
+    alphal, l, error = armijo_goldstein(objfun, xk, dk, a0, b0, alpha0)
     print("Armijo-Goldstein步长准则: ", alphal, l, error)
 
     # alphal, l, error = Armijo_Goldstein(objfun, xk, dk)

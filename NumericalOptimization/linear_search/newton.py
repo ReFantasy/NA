@@ -2,10 +2,12 @@ from jax import grad, hessian
 
 
 ## 牛顿法
-def newton(objfun: callable, a: float, b: float, epsilon: float):
+def newton(objfun: callable, a: float, b: float, epsilon: float, gradfun=None, hessianfun=None):
     # automatically compute the gradient and hessian of the objective function
-    gradfun = grad(objfun)
-    hessianfun = hessian(objfun)
+    if gradfun == None:
+        gradfun = grad(objfun)
+    if hessianfun == None:
+        hessianfun = hessian(objfun)
 
     xk = (a + b) / 2
     k = 0
