@@ -74,6 +74,7 @@ def fibonacci(objfun: callable, a: float, b: float, epsilon: float):
 
 if __name__ == "__main__":
     import jax
+    jax.config.update("jax_enable_x64", True)
 
     @jax.jit
     def objfun(x):

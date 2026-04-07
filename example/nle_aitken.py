@@ -6,6 +6,9 @@ def ff(x):
 
 
 if __name__ == "__main__":
+    import jax
+    jax.config.update("jax_enable_x64", True)
+    
     # Using Aitken's method
     # iter function is iter_func: f(x) = x*x*x -1
     x = na.NLE.aitken(lambda x: x * x * x - 1, x0=1.5, tol=1e-4)

@@ -6,6 +6,9 @@ def ff(x):
 
 
 if __name__ == "__main__":
+    import jax
+    jax.config.update("jax_enable_x64", True)
+    
     I = [1, 2]
     tol = 1e-4
     x = na.NLE.bisection(I, ff, tol=tol)

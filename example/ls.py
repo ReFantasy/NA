@@ -2,6 +2,9 @@ import NumericalAnalysis as na
 import jax.numpy as jnp
 
 if __name__ == "__main__":
+    import jax
+    jax.config.update("jax_enable_x64", True)
+
     A = jnp.array([[5, 2, 1], [-1, 4, 2], [2, -3, 10]])
     b = jnp.array([-12, 20, 3])
     tol = 1e-6

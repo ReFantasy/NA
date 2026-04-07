@@ -19,6 +19,9 @@ def ff_vec(x):
 
 
 if __name__ == "__main__":
+    import jax
+    jax.config.update("jax_enable_x64", True)
+    
     print("Using Newton's method solve single nonlinear equation")
     x = na.NLE.newton(ff, x0=1.5, tol=1e-4)
     print("The root is:", x)

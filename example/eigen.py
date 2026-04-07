@@ -31,6 +31,8 @@ def compute_time():
 
 
 if __name__ == "__main__":
+    jax.config.update("jax_enable_x64", True)
+    
     # A = jnp.array([[6, -2, 1],
     #                [-2, 5, 3],
     #                [1, 3, -4]])
