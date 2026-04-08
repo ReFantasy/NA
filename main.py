@@ -20,3 +20,6 @@ if __name__ == "__main__":
     print(x1, x3, k)
     x_star, y_star, _ = optimizer.linear_search.golden(objfun, x1, x3, 1e-8)
     print(x_star, y_star)
+
+    NumericalOptimization.linear_search.armijo_goldstein(objfun, x1, -0.5, 0.0, 20.0, 10.0)
+    NumericalOptimization.linear_search.wolf_powell(objfun, x1, -0.5, 0.0, 20.0, 10.0)
