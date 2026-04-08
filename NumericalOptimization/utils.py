@@ -1,3 +1,35 @@
+import NumericalOptimization.linear_search as linear_search
+
+
+def line_search_method(name="golden"):
+    if name == "golden":
+        return linear_search.golden
+    elif name == "newton":
+        return linear_search.newton
+    elif name == "fibonacci":
+        return linear_search.fibonacci
+    elif name == "armijo_goldstein":
+        return linear_search.armijo_goldstein
+    elif name == "wolf_powell":
+        return linear_search.wolf_powell
+    elif name == "secant":
+        return linear_search.secant
+    elif name == "parabola":
+        return linear_search.parabola
+    else:
+        raise ValueError("Unknown line search method: {}".format(name))
+
+
+def line_search_function(objfun, xk, dk, method_name="golden", a=0.0, b=3.0, epsilon: float = 0.00001):
+    search = line_search_method(method_name)
+    if method_name == "wolf_powell" or method_name == "armijo_goldstein":
+        lambdak, fstar, k = search(objfun=objfun, xk=xk, dk=dk)
+    else:
+        phi = lambda alpha: objfun(xk + alpha * dk)
+        lambdak, fstar, k = search(phi, a, b, epsilon)
+    return lambdak, fstar, k
+
+
 def chase(objfun: callable, x_init: float, h: float):
     """
     使用进退法（Bounding Phase Method）寻找一元函数的极小值包含区间。

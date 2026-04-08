@@ -2,10 +2,10 @@ from jax import grad
 
 
 ## 割线法
-def secant(objfun: callable, a: float, b: float, epsilon: float, gradfun=None):
+def secant(phi: callable, a: float, b: float, epsilon: float, gradfun=None):
     # automatically compute the gradient of the objective function
     if gradfun == None:
-        gradfun = grad(objfun)
+        gradfun = grad(phi)
 
     xk_1, xk = a, b
     k = 0
@@ -14,7 +14,7 @@ def secant(objfun: callable, a: float, b: float, epsilon: float, gradfun=None):
         k += 1
         if abs(gradfun(xk)) <= epsilon:
             xstar = xk
-            fstar = objfun(xk)
+            fstar = phi(xk)
             return xstar, fstar, k
         else:
             temp = xk

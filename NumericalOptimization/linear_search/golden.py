@@ -12,7 +12,7 @@ Revisions:
 
 
 ## 黄金分割法
-def golden(objfun: callable, a: float, b: float, epsilon: float) -> tuple[float, float, int]:
+def golden(phi: callable, a: float, b: float, epsilon: float) -> tuple[float, float, int]:
     """
     [精确线性搜索] 使用黄金分割法（0.618法）求解一元函数在给定区间内的极小值点。
 
@@ -33,15 +33,15 @@ def golden(objfun: callable, a: float, b: float, epsilon: float) -> tuple[float,
     k = 1  # 迭代计数器
     lambdak = ak + 0.382 * (bk - ak)  # 左试探点
     muk = ak + 0.618 * (bk - ak)  # 右试探点
-    flambdak = objfun(lambdak)  # 左试探点函数值
-    fmuk = objfun(muk)  # 右试探点函数值
+    flambdak = phi(lambdak)  # 左试探点函数值
+    fmuk = phi(muk)  # 右试探点函数值
 
     # 迭代过程
     while True:
         # print(k,ak,bk,bk-ak)
         if bk - ak <= epsilon:  # 终止条件判断
             xstar = (ak + bk) / 2
-            fstar = objfun(xstar)
+            fstar = phi(xstar)
             return xstar, fstar, k
         else:
             k += 1  # 迭代计数
@@ -50,17 +50,18 @@ def golden(objfun: callable, a: float, b: float, epsilon: float) -> tuple[float,
                 muk = lambdak
                 fmuk = flambdak
                 lambdak = ak + 0.382 * (bk - ak)
-                flambdak = objfun(lambdak)
+                flambdak = phi(lambdak)
             else:  # 情形 2
                 ak = lambdak
                 lambdak = muk
                 flambdak = fmuk
                 muk = ak + 0.618 * (bk - ak)
-                fmuk = objfun(muk)
+                fmuk = phi(muk)
 
 
 if __name__ == "__main__":
     import jax
+
     jax.config.update("jax_enable_x64", True)
 
     @jax.jit

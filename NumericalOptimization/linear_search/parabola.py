@@ -2,9 +2,9 @@ import jax.numpy as jnp
 
 
 ## 抛物线法
-def parabola(objfun: callable, a: float, b: float, epsilon: float):
+def parabola(phi: callable, a: float, b: float, epsilon: float):
     x1prime, x2prime, x3prime = a, (a + b) / 2.0, b
-    fx1prime, fx2prime, fx3prime = objfun(x1prime), objfun(x2prime), objfun(x3prime)
+    fx1prime, fx2prime, fx3prime = phi(x1prime), phi(x2prime), phi(x3prime)
     xk, fxk = x2prime, fx2prime
     k = 0
 
@@ -21,7 +21,7 @@ def parabola(objfun: callable, a: float, b: float, epsilon: float):
         xstarprime = -D1_det / (2.0 * D2_det)  # 式（2-55）
 
         xk_1, fxk_1 = xk, fxk
-        xk, fxk = xstarprime, objfun(xstarprime)
+        xk, fxk = xstarprime, phi(xstarprime)
 
         if abs(fxk - fxk_1) < epsilon or abs(xk - xk_1) < epsilon:
             xstar = xk
