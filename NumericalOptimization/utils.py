@@ -1,4 +1,7 @@
 import NumericalOptimization.linear_search as linear_search
+import jax.numpy as jnp
+
+import NumericalAnalysis as na
 
 
 def line_search_function(objfun, xk, dk, method_name="golden", a=0.0, b=3.0, init_alpha=1.0, epsilon: float = 0.00001):
@@ -109,3 +112,41 @@ def chase(phi: callable, x_init: float, h: float):
             else:
                 x3, x2 = x2, x1
                 fx3, fx2 = fx2, fx1
+
+
+def is_pd(A: jnp.ndarray) -> jnp.ndarray:
+    """
+    检查矩阵 A 是否对角占优。
+    当A是对角占优的，则A是正定矩阵。
+    当A不是对角占优也可能是正定的。
+    参数
+    ----------
+    A : jnp.ndarray
+        待检查的矩阵。
+
+    返回
+    -------
+    jnp.ndarray
+        如果 A 是正定矩阵，返回 True；否则返回 False。
+    """
+    return na.utils.is_sdd(A)
+
+
+def proj_pd(A: jnp.ndarray, delta: float = 1e-2) -> jnp.ndarray:
+    """
+    将矩阵 A 投影到正定矩阵空间。
+    参数
+    ----------
+    A : jnp.ndarray
+        待投影的矩阵。
+
+    返回
+    -------
+    jnp.ndarray
+        投影后的正定矩阵。
+    """
+    assert A.shape[0] == A.shape[1], "Input must be a square matrix."
+
+    while not is_pd(A):
+        A += jnp.eye(A.shape[0]) * delta
+    return A
