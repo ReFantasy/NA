@@ -18,9 +18,20 @@ import numpy as np
 
 jax.config.update("jax_enable_x64", True)
 
+linear_search_name = [
+    "golden",
+    "fibonacci",
+    "newton",
+    "secant",
+    "parabola",
+    "armijo_goldstein",
+    "wolf_powell",
+    "simple_rule",
+]
+
 
 # ---------------------------------------------------------------------
-#                            试探法测试
+#                           最速梯度法
 # ---------------------------------------------------------------------
 class TestGradientDescent:
 
@@ -31,16 +42,6 @@ class TestGradientDescent:
 
     # 黄金分割法
     def test_gradient_descent(self):
-        linear_search_name = [
-            "golden",
-            "fibonacci",
-            "newton",
-            "secant",
-            "parabola",
-            "armijo_goldstein",
-            "wolf_powell",
-            "simple_rule",
-        ]
         for name in linear_search_name:
             print("测试梯度下降法，线搜索方法：", name)
             x0 = jnp.array([1.0, 1.0])
