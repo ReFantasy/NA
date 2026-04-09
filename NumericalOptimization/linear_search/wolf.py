@@ -60,34 +60,3 @@ def wolf_powell(objfun, xk, dk, a0=0.0, b0=sys.float_info.max, alpha0=1.0, rho=0
             alphal = (al + bl) / 2.0
             l += 1
             continue
-
-
-## 主函数
-if __name__ == "__main__":
-    import jax
-
-    jax.config.update("jax_enable_x64", True)
-
-    ## 原问题目标函数
-    def objfun(x):
-        y = (x[0] - 1.0) ** 2.0 + (x[1] + 1.0) ** 2.0
-        return y
-
-    ##原问题目标函数的梯度函数
-    # def gradfun(x):
-    #     y = np.array([2 * (x[0] - 1), 2 * (x[1] + 1)])
-    #     return y
-    gradfun = jax.grad(objfun)
-
-    # 输入
-    xk = jnp.array([0.0, 0.0])  # 原目标函数当前跌点
-    dk = -gradfun(xk)  # 当前搜索方向
-    a0, b0, alpha0 = 0.0, 20.0, 10.0  # 初始区间和初始试探点
-    # a0, b0, alpha0 = 0.0, 0.00001, 0.0000001  # 初始区间和初始试探点
-
-    # Wolf-Powell步长准则
-    alphal, l, error = wolf_powell(objfun, xk, dk, a0, b0, alpha0)
-    print("Wolf-Powell步长准则: ", alphal, l, error)
-
-    # alphal, l, error = Wolf_Powell(objfun, xk, dk)
-    # print("Wolf-Powell步长准则: ", alphal, l, error)

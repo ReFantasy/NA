@@ -59,29 +59,3 @@ def armijo_goldstein(objfun, xk, dk, a0=0.0, b0=sys.float_info.max, alpha0=1.0, 
             alphal = (al + bl) / 2.0
             l += 1
             continue
-
-
-## 主函数
-if __name__ == "__main__":
-    import jax
-
-    jax.config.update("jax_enable_x64", True)
-
-    def objfun(x):
-        y = (x[0] - 1) ** 2 + (x[1] + 1) ** 2
-        return y
-
-    gradfun = jax.grad(objfun)
-
-    # 输入
-    xk = jnp.array([0.0, 0.0])  # 原目标函数当前跌点
-    dk = -gradfun(xk)  # 当前搜索方向
-
-    # a0, b0, alpha0 = 0.0, 20.0, 10.0  # 初始区间和初始试探点 Armijo-Goldstein步长准则:  (0.625, 4, np.float64(1.875))
-    a0, b0, alpha0 = 0.0, 0.00001, 0.0000001  # 初始区间和初始试探点
-
-    alphal, l, error = armijo_goldstein(objfun, xk, dk, a0, b0, alpha0)
-    print("Armijo-Goldstein步长准则: ", alphal, l, error)
-
-    # alphal, l, error = Armijo_Goldstein(objfun, xk, dk)
-    # print("Armijo-Goldstein步长准则: ", alphal, l, error)

@@ -57,23 +57,3 @@ def golden(phi: callable, a: float, b: float, epsilon: float) -> tuple[float, fl
                 flambdak = fmuk
                 muk = ak + 0.618 * (bk - ak)
                 fmuk = phi(muk)
-
-
-if __name__ == "__main__":
-    import jax
-
-    jax.config.update("jax_enable_x64", True)
-
-    @jax.jit
-    def objfun(x):
-        y = 2 * x**2 - 4 * x - 1
-        return y
-
-    # 输入
-    a = -4.0  # 初始区间左端点
-    b = 4.0  # 初始区间右端点
-    epsilon = 0.1  # 容忍精度
-
-    # 黄金分割法
-    xstar, fstar, k = golden(objfun, a, b, epsilon)
-    print("Golden Method: ", xstar, fstar, k)

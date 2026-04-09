@@ -37,24 +37,3 @@ def parabola(phi: callable, a: float, b: float, epsilon: float):
             index = jnp.array([fmin_index - 1, fmin_index, fmin_index + 1])
             x1prime, x2prime, x3prime = xsort[index]
             fx1prime, fx2prime, fx3prime = fsort[index]
-
-
-if __name__ == "__main__":
-    import math
-    import jax
-
-    jax.config.update("jax_enable_x64", True)
-
-    @jax.jit
-    def objfun(x):
-        y = math.e ** (-x) + x**2
-        return y
-
-    # 输入
-    a = -4.0  # 初始区间左端点
-    b = 4.0  # 初始区间右端点
-    epsilon = 0.00001  # 容忍精度
-
-    # 抛物线法
-    xstar, fstar, k = parabola(objfun, a, b, epsilon)
-    print("Parabola: ", xstar, fstar, k)

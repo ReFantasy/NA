@@ -9,7 +9,9 @@ import jax.numpy as jnp
 jax.config.update("jax_enable_x64", True)
 
 
-############################## 追赶法测试 ##############################
+# ---------------------------------------------------------------------
+#                            追赶法测试
+# ---------------------------------------------------------------------
 def test_chase():
     def phi(x):
         y = x * math.sin(x)
@@ -31,7 +33,9 @@ def test_chase():
     assert b == approx(-10.0)
 
 
-############################## 试探法测试 ##############################
+# ---------------------------------------------------------------------
+#                            试探法测试
+# ---------------------------------------------------------------------
 class TestEliminationMethods:
     @staticmethod
     def phi(x):
@@ -55,7 +59,9 @@ class TestEliminationMethods:
         assert xstar == approx(1.07865168, abs=1e-7)
 
 
-############################## 逼近法测试 ##############################
+# ---------------------------------------------------------------------
+#                            逼近法测试
+# ---------------------------------------------------------------------
 class TestApproximationMethods:
     @staticmethod
     def phi(x):
@@ -87,7 +93,9 @@ class TestApproximationMethods:
         assert xstar == approx(0.35178535, abs=1e-7)
 
 
-############################## 非精确一维搜索 ##############################
+# ---------------------------------------------------------------------
+#                            非精确一维搜索
+# ---------------------------------------------------------------------
 class TestInexactLineSearch:
     @staticmethod
     def objfun(x):
@@ -108,15 +116,9 @@ class TestInexactLineSearch:
         xstar, _, _ = linear_search.wolf_powell(self.objfun, xk, dk, a0, b0, alpha0)
         assert xstar == approx(0.625, abs=1e-3)
 
-
-# 黄金分割法
-# def test_golden():
-#     def objfun(x):
-#         y = 2*x**2-4*x-1
-#         return y
-
-#     a = -4.             # 初始区间左端点
-#     b = 4.              # 初始区间右端点
-#     epsilon = 0.1    # 容忍精度
-#     xstar, fstar, k = linear_search.golden(objfun, a, b, epsilon)
-#     assert xstar == approx(1.01685426, abs=1e-5)
+    def test_simple_rule(self):
+        xk = jnp.array([0.0, 0.0])  # 原目标函数当前跌点
+        dk = -jax.grad(self.objfun)(xk)  # 当前搜索方向
+        a0, b0, alpha0 = 0.0, 20.0, 10.0  # 初始区间和初始试探点
+        xstar, _, _ = linear_search.simple_rule(self.objfun, xk, dk, a0, b0, alpha0)
+        assert xstar == approx(0.6461, abs=1e-3)

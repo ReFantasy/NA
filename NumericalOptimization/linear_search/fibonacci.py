@@ -70,23 +70,3 @@ def fibonacci(phi: callable, a: float, b: float, epsilon: float):
                 flambdak = fmuk
                 muk = ak + (fibseq[(n - 1) - k] / fibseq[(n - 1) - k + 1]) * (bk - ak)
                 fmuk = phi(muk)
-
-
-if __name__ == "__main__":
-    import jax
-
-    jax.config.update("jax_enable_x64", True)
-
-    @jax.jit
-    def objfun(x):
-        y = 2 * x**2 - 4 * x - 1
-        return y
-
-    # 输入
-    a = -4.0  # 初始区间左端点
-    b = 4.0  # 初始区间右端点
-    epsilon = 0.1  # 容忍精度
-
-    # 斐波拉契法
-    xstar, fstar, k = fibonacci(objfun, a, b, epsilon)
-    print("Fibonacci Method: ", xstar, fstar, k)

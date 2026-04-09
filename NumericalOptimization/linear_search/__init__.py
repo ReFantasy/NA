@@ -5,3 +5,4 @@ from .secant import *
 from .parabola import *
 from .armijo import *
 from .wolf import *
+from .simple_rule import *
