@@ -28,7 +28,7 @@ def test_proj_pd():
     assert is_pd(A_proj) == True, "A_proj 应该是正定的"
 
     # 验证 A_proj 的特征值都大于等于 0
-    eigvals = jnp.linalg.eigvalsh(A_proj)
+    eigvals = jnp.linalg.eigvals(A_proj)
     assert jnp.all(eigvals >= 0), "A_proj 的特征值应该都大于等于 0"
 
     # 使用随机向量验证 A_proj 的二次型是非负的
