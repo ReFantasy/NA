@@ -3,8 +3,7 @@ import jax.numpy as jnp
 from NumericalOptimization.utils import line_search_function, proj_pd, is_pd
 
 
-## 牛顿法
-def newton(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_name=None):
+def newton_basic(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_name=None):
     if gradfun is None:
         gradfun = jax.grad(objfun)
     if hessianfun is None:
@@ -124,53 +123,54 @@ def newton_goldfeld(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_sea
 ## 主程序
 if __name__ == "__main__":
 
-    # @jax.jit
-    # def objfun(x):
-    #     y = jnp.pow(x[0], 4) + x[0] * x[1] + (1.0 + x[1]) ** 2
-    #     return y
-
-    # epsilon = 0.001
-    # # x0 = jnp.array([1.0, 2.0])
-    # x0 = jnp.array([0.0, 0.0])
-    # # xstar, fstar, k = newton(objfun, x0, epsilon)
-    # xstar, fstar, k = newton_goldstein_price(objfun, x0, epsilon, line_search_name="golden")
-    # print(xstar, fstar, k)
-    # xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon, line_search_name="golden")
-    # print(xstar, fstar, k)
-
     @jax.jit
     def objfun(x):
-        y = x[0] ** 2 + (x[1] - 1.0) ** 4
+        y = jnp.pow(x[0], 4) + x[0] * x[1] + (1.0 + x[1]) ** 2
         return y
 
-    epsilon = 0.0001
-
-    ## 第1组
-    x0 = jnp.array([1.0, 2.0])
-    xstar, fstar, k = newton_goldstein(objfun, x0, epsilon)
+    epsilon = 0.001
+    # x0 = jnp.array([1.0, 2.0])
+    x0 = jnp.array([0.0, 0.0])
+    # xstar, fstar, k = newton_basic(objfun, x0, epsilon)
+    # print(xstar, fstar, k)
+    xstar, fstar, k = newton_goldstein(objfun, x0, epsilon, line_search_name="golden")
+    print(xstar, fstar, k)
+    xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon, line_search_name="golden")
     print(xstar, fstar, k)
 
-    ## 第2组
-    x0 = jnp.array([-2.0, 3.0])
-    xstar, fstar, k = newton_goldstein(objfun, x0, epsilon)
-    print(xstar, fstar, k)
+    # @jax.jit
+    # def objfun(x):
+    #     y = x[0] ** 2 + (x[1] - 1.0) ** 4
+    #     return y
 
-    ## 第3组
-    x0 = jnp.array([10.0, -10.0])
-    xstar, fstar, k = newton_goldstein(objfun, x0, epsilon)
-    print(xstar, fstar, k)
+    # epsilon = 0.0001
 
-    ## 第1组
-    x0 = jnp.array([1.0, 2.0])
-    xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon)
-    print(xstar, fstar, k)
+    # ## 第1组
+    # x0 = jnp.array([1.0, 2.0])
+    # xstar, fstar, k = newton_goldstein(objfun, x0, epsilon)
+    # print(xstar, fstar, k)
 
-    ## 第2组
-    x0 = jnp.array([-2.0, 3.0])
-    xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon)
-    print(xstar, fstar, k)
+    # ## 第2组
+    # x0 = jnp.array([-2.0, 3.0])
+    # xstar, fstar, k = newton_goldstein(objfun, x0, epsilon)
+    # print(xstar, fstar, k)
 
-    ## 第3组
-    x0 = jnp.array([10.0, -10.0])
-    xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon)
-    print(xstar, fstar, k)
+    # ## 第3组
+    # x0 = jnp.array([10.0, -10.0])
+    # xstar, fstar, k = newton_goldstein(objfun, x0, epsilon)
+    # print(xstar, fstar, k)
+
+    # ## 第1组
+    # x0 = jnp.array([1.0, 2.0])
+    # xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon)
+    # print(xstar, fstar, k)
+
+    # ## 第2组
+    # x0 = jnp.array([-2.0, 3.0])
+    # xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon)
+    # print(xstar, fstar, k)
+
+    # ## 第3组
+    # x0 = jnp.array([10.0, -10.0])
+    # xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon)
+    # print(xstar, fstar, k)
