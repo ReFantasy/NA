@@ -109,5 +109,3 @@ def chase(phi: callable, x_init: float, h: float):
             else:
                 x3, x2 = x2, x1
                 fx3, fx2 = fx2, fx1
-
-
