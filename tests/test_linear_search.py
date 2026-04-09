@@ -47,16 +47,16 @@ class TestEliminationMethods:
         a = -4.0  # 初始区间左端点
         b = 4.0  # 初始区间右端点
         epsilon = 0.1  # 容忍精度
-        xstar, _, _ = linear_search.golden(self.phi, a, b, epsilon)
-        assert xstar == approx(1.01685426, abs=1e-7)
+        alpha, _, _ = linear_search.golden(self.phi, a, b, epsilon)
+        assert alpha == approx(1.01685426, abs=1e-7)
 
     # 斐波那契法
     def test_fibonacci(self):
         a = -4.0  # 初始区间左端点
         b = 4.0  # 初始区间右端点
         epsilon = 0.1  # 容忍精度
-        xstar, _, _ = linear_search.fibonacci(self.phi, a, b, epsilon)
-        assert xstar == approx(1.07865168, abs=1e-7)
+        alpha, _, _ = linear_search.fibonacci(self.phi, a, b, epsilon)
+        assert alpha == approx(1.07865168, abs=1e-7)
 
 
 # ---------------------------------------------------------------------
@@ -73,24 +73,24 @@ class TestApproximationMethods:
         a = -4.0  # 初始区间左端点
         b = 4.0  # 初始区间右端点
         epsilon = 0.00001  # 容忍精度
-        xstar, _, _ = linear_search.newton(self.phi, a, b, epsilon)
-        assert xstar == approx(0.35173371, abs=1e-7)
+        alpha, _, _ = linear_search.newton(self.phi, a, b, epsilon)
+        assert alpha == approx(0.35173371, abs=1e-7)
 
     # 割线法
     def test_secant(self):
         a = -4.0  # 初始区间左端点
         b = 4.0  # 初始区间右端点
         epsilon = 0.00001  # 容忍精度
-        xstar, _, _ = linear_search.secant(self.phi, a, b, epsilon)
-        assert xstar == approx(0.351733717, abs=1e-7)
+        alpha, _, _ = linear_search.secant(self.phi, a, b, epsilon)
+        assert alpha == approx(0.351733717, abs=1e-7)
 
     # 抛物线法
     def test_parabola(self):
         a = -4.0  # 初始区间左端点
         b = 4.0  # 初始区间右端点
         epsilon = 0.00001  # 容忍精度
-        xstar, _, _ = linear_search.parabola(self.phi, a, b, epsilon)
-        assert xstar == approx(0.35178535, abs=1e-7)
+        alpha, _, _ = linear_search.parabola(self.phi, a, b, epsilon)
+        assert alpha == approx(0.35178535, abs=1e-7)
 
 
 # ---------------------------------------------------------------------
@@ -106,19 +106,19 @@ class TestInexactLineSearch:
         xk = jnp.array([0.0, 0.0])  # 原目标函数当前跌点
         dk = -jax.grad(self.objfun)(xk)  # 当前搜索方向
         a0, b0, alpha0 = 0.0, 20.0, 10.0  # 初始区间和初始试探点
-        xstar, _, _ = linear_search.armijo_goldstein(self.objfun, xk, dk, a0, b0, alpha0)
-        assert xstar == approx(0.625, abs=1e-3)
+        alpha, _, _ = linear_search.armijo_goldstein(self.objfun, xk, dk, a0, b0, alpha0)
+        assert alpha == approx(0.625, abs=1e-3)
 
     def test_wolf_powell(self):
         xk = jnp.array([0.0, 0.0])  # 原目标函数当前跌点
         dk = -jax.grad(self.objfun)(xk)  # 当前搜索方向
         a0, b0, alpha0 = 0.0, 20.0, 10.0  # 初始区间和初始试探点
-        xstar, _, _ = linear_search.wolf_powell(self.objfun, xk, dk, a0, b0, alpha0)
-        assert xstar == approx(0.625, abs=1e-3)
+        alpha, _, _ = linear_search.wolf_powell(self.objfun, xk, dk, a0, b0, alpha0)
+        assert alpha == approx(0.625, abs=1e-3)
 
     def test_simple_rule(self):
         xk = jnp.array([0.0, 0.0])  # 原目标函数当前跌点
         dk = -jax.grad(self.objfun)(xk)  # 当前搜索方向
         a0, b0, alpha0 = 0.0, 20.0, 10.0  # 初始区间和初始试探点
-        xstar, _, _ = linear_search.simple_rule(self.objfun, xk, dk, a0, b0, alpha0)
-        assert xstar == approx(0.6461, abs=1e-3)
+        alpha, _, _ = linear_search.simple_rule(self.objfun, xk, dk, a0, b0, alpha0)
+        assert alpha == approx(0.6461, abs=1e-3)
