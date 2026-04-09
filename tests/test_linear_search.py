@@ -1,3 +1,12 @@
+"""
+一维线搜索算法测试模块，
+
+Author:
+    ReFantasy (Created on 2026-04-09 15:38:00)
+
+Revisions:
+    ## 2026-04-09 [ReFantasy]: ----
+"""
 from pytest import approx
 import NumericalOptimization.linear_search as linear_search
 from NumericalOptimization.utils import chase
