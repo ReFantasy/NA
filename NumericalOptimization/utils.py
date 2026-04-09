@@ -111,25 +111,3 @@ def chase(phi: callable, x_init: float, h: float):
                 fx3, fx2 = fx2, fx1
 
 
-if __name__ == "__main__":
-    import jax
-    import jax.numpy as jnp
-
-    @jax.jit
-    def objfun(x):
-        return x * jnp.sin(x)
-
-    # 第1组
-    x0, h = -2.0, 1  # 初始试探点和试探步长
-    a, b, k = chase(objfun, x0, h)  # 追赶法
-    print(f"Input:x0={x0},h={h}; Output: [{a},{b}], {k}")
-
-    # 第2组
-    x0, h = 5.0, 0.5  # 初始试探点和试探步长
-    a, b, k = chase(objfun, x0, h)  # 追赶法
-    print(f"Input:x0={x0},h={h}; Output: [{a},{b}], {k}")
-
-    # 第3组
-    x0, h = -13.0, 1  # 初始试探点和试探步长
-    a, b, k = chase(objfun, x0, h)  # 追赶法
-    print(f"Input:x0={x0},h={h}; Output: [{a},{b}], {k}")
