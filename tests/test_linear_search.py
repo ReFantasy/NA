@@ -7,6 +7,7 @@ Author:
 Revisions:
     ## 2026-04-09 [ReFantasy]: ----
 """
+
 from pytest import approx
 import NumericalOptimization.linear_search as linear_search
 from NumericalOptimization.utils import chase
