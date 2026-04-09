@@ -1,5 +1,5 @@
 # NumericalAnalysis(NA)
-数值分析 Python 实现
+数值分析及最优化方法 Python 实现
 ## Build and Run
 Install [uv](https://uv.doczh.com) 
 
