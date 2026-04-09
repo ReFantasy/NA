@@ -11,14 +11,13 @@ Revisions:
 from pytest import approx
 import NumericalOptimization.gradient_methods.gradient_descent as gradient_descent
 
-import math
 import jax
 import jax.numpy as jnp
 import numpy as np
 
 jax.config.update("jax_enable_x64", True)
 
-linear_search_name = [
+linear_search_names = [
     "golden",
     "fibonacci",
     "newton",
@@ -42,17 +41,17 @@ class TestGradientDescent:
 
     # 黄金分割法
     def test_gradient_descent(self):
-        for name in linear_search_name:
+        for name in linear_search_names:
             print("测试梯度下降法，线搜索方法：", name)
             x0 = jnp.array([1.0, 1.0])
             epsilon = 0.001
-            xstar, _, _ = gradient_descent(self.objfun, x0, epsilon, name)
+            xstar, _, _ = gradient_descent(self.objfun, x0, epsilon, line_search_name=name)
             assert np.array(xstar) == approx([2.0, -3.0], abs=0.0001)
 
             x0 = jnp.array([-2.0, 3.0])
-            xstar, _, _ = gradient_descent(self.objfun, x0, epsilon, name)
+            xstar, _, _ = gradient_descent(self.objfun, x0, epsilon, line_search_name=name)
             assert np.array(xstar) == approx([2.0, -3.0], abs=0.0001)
 
             x0 = jnp.array([10.0, -10.0])
-            xstar, _, _ = gradient_descent(self.objfun, x0, epsilon, name)
+            xstar, _, _ = gradient_descent(self.objfun, x0, epsilon, line_search_name=name)
             assert np.array(xstar) == approx([2.0, -3.0], abs=0.0001)

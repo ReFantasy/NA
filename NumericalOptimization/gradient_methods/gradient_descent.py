@@ -4,8 +4,9 @@ import jax.numpy as jnp
 
 
 ## 最速下降法
-def gradient_descent(objfun, x0, epsilon, line_search_name="golden"):
-    gradfun = jax.grad(objfun)
+def gradient_descent(objfun, x0, epsilon, gradfun=None, line_search_name="golden"):
+    if gradfun is None:
+        gradfun = jax.grad(objfun)
 
     xk = x0
     k = 0
