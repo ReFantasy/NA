@@ -3,7 +3,7 @@ import jax.numpy as jnp
 from NumericalOptimization.utils import line_search_function, proj_pd, is_pd
 
 
-def newton_basic(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_name=None):
+def newton_basic(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_name="wolf_powell"):
     if gradfun is None:
         gradfun = jax.grad(objfun)
     if hessianfun is None:
@@ -37,7 +37,7 @@ def newton_basic(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search
                 xk += dk
 
 
-def newton_goldstein(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_name=None):
+def newton_goldstein(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_name="wolf_powell"):
     """
     if hessian of objective function is not positive definite, the Newton direction may not be a descent direction,
     so we can use the gradient direction to replace the Newton direction for line search, which is called Goldstein-Price method.
@@ -77,7 +77,7 @@ def newton_goldstein(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_se
                 xk += dk
 
 
-def newton_goldfeld(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_name=None):
+def newton_goldfeld(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_name="wolf_powell"):
     """
     if hessian of objective function is not positive definite, the Newton direction may not be a descent direction,
     so we can modify the Hessian matrix by adding a positive multiple of the identity matrix to make it positive definite, which is called Goldfeld method.

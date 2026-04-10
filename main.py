@@ -1,25 +1,20 @@
-import NumericalOptimization
 import NumericalOptimization as optimizer
 import jax
+import jax.numpy as jnp
+from NumericalOptimization.utils import functions
 
 
 def main():
     print("Hello from na!")
 
 
-@jax.jit
-def objfun(x):
-    # return x * jnp.sin(x)
-    return (x - 1) ** 2 + 1.5
-
-
 if __name__ == "__main__":
+    jax.config.update("jax_enable_x64", True)
 
-    x1, x3, k = NumericalOptimization.utils.chase(objfun, -0.6, 0.4)
+    x0 = jnp.array([90.1, -80.3])
 
-    print(x1, x3, k)
-    x_star, y_star, _ = optimizer.linear_search.golden(objfun, x1, x3, 1e-8)
-    print(x_star, y_star)
+    xstar, fstar, k = optimizer.gradient_methods.gradient_descent(
+        functions.boha1, x0, epsilon=1e-3, line_search_name="golden"
+    )
 
-    NumericalOptimization.linear_search.armijo_goldstein(objfun, x1, -0.5, 0.0, 20.0, 10.0)
-    NumericalOptimization.linear_search.wolf_powell(objfun, x1, -0.5, 0.0, 20.0, 10.0)
+    print(xstar, fstar, k)
