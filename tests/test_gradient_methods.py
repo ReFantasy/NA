@@ -10,7 +10,7 @@ Revisions:
 
 from pytest import approx
 import NumericalOptimization.gradient_methods.gradient_descent as gradient_descent
-
+from NumericalOptimization import gradient_methods
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -55,3 +55,46 @@ class TestGradientDescent:
             x0 = jnp.array([10.0, -10.0])
             xstar, _, _ = gradient_descent(self.objfun, x0, epsilon, line_search_name=name)
             assert np.array(xstar) == approx([2.0, -3.0], abs=0.0001)
+
+
+# ---------------------------------------------------------------------
+#                           牛顿法
+# ---------------------------------------------------------------------
+class TestNewton:
+
+    @staticmethod
+    def objfun(x):
+        y = x[0] ** 4 + x[0] * x[1] + (1 + x[1]) ** 2
+        return y
+
+    # 黄金分割法
+    def test_newton(self):
+        for name in linear_search_names:
+            print("测试牛顿法，线搜索方法：", name)
+            x0 = jnp.array([1.0, 1.0])
+            epsilon = 0.001
+            xstar, _, _ = gradient_methods.newton_goldstein(self.objfun, x0, epsilon, line_search_name=name)
+            assert np.array(xstar) == approx([0.6958, -1.3479], abs=0.001)
+
+            x0 = jnp.array([-2.0, 3.0])
+            xstar, _, _ = gradient_methods.newton_goldstein(self.objfun, x0, epsilon, line_search_name=name)
+            assert np.array(xstar) == approx([0.6958, -1.3479], abs=0.001)
+
+            x0 = jnp.array([10.0, -10.0])
+            xstar, _, _ = gradient_methods.newton_goldstein(self.objfun, x0, epsilon, line_search_name=name)
+            assert np.array(xstar) == approx([0.6958, -1.3479], abs=0.001)
+
+        for name in linear_search_names:
+            print("测试牛顿法，线搜索方法：", name)
+            x0 = jnp.array([1.0, 1.0])
+            epsilon = 0.001
+            xstar, _, _ = gradient_methods.newton_goldfeld(self.objfun, x0, epsilon, line_search_name=name)
+            assert np.array(xstar) == approx([0.6958, -1.3479], abs=0.001)
+
+            x0 = jnp.array([-2.0, 3.0])
+            xstar, _, _ = gradient_methods.newton_goldfeld(self.objfun, x0, epsilon, line_search_name=name)
+            assert np.array(xstar) == approx([0.6958, -1.3479], abs=0.001)
+
+            x0 = jnp.array([10.0, -10.0])
+            xstar, _, _ = gradient_methods.newton_goldfeld(self.objfun, x0, epsilon, line_search_name=name)
+            assert np.array(xstar) == approx([0.6958, -1.3479], abs=0.001)
