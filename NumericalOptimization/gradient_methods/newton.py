@@ -1,9 +1,10 @@
 import jax
 import jax.numpy as jnp
 from NumericalOptimization.utils import line_search_function, proj_pd, is_pd
+from NumericalOptimization.linear_search import LineSearchParams
 
 
-def newton_basic(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_name="wolf_powell"):
+def newton_basic(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_params: LineSearchParams = None):
     if gradfun is None:
         gradfun = jax.grad(objfun)
     if hessianfun is None:
@@ -30,14 +31,14 @@ def newton_basic(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search
 
             # if line_search_name is not None, we can perform line search to find the optimal step size alpha
             # this is called damped Newton method, which can improve the convergence of the algorithm
-            if line_search_name is not None:
-                alpha, _, _ = line_search_function(objfun, xk, dk, line_search_name)
+            if line_search_params is not None:
+                alpha, _, _ = line_search_function(objfun, xk, dk, line_search_params)
                 xk += alpha * dk
             else:
                 xk += dk
 
 
-def newton_goldstein(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_name="wolf_powell"):
+def newton_goldstein(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_params: LineSearchParams = None):
     """
     if hessian of objective function is not positive definite, the Newton direction may not be a descent direction,
     so we can use the gradient direction to replace the Newton direction for line search, which is called Goldstein-Price method.
@@ -70,14 +71,14 @@ def newton_goldstein(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_se
             else:
                 dk = -gk  # 使用最速下降方向搜索
 
-            if line_search_name is not None:
-                alpha, _, _ = line_search_function(objfun, xk, dk, line_search_name)
+            if line_search_params is not None:
+                alpha, _, _ = line_search_function(objfun, xk, dk, line_search_params)
                 xk += alpha * dk
             else:
                 xk += dk
 
 
-def newton_goldfeld(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_name="wolf_powell"):
+def newton_goldfeld(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_params: LineSearchParams = None):
     """
     if hessian of objective function is not positive definite, the Newton direction may not be a descent direction,
     so we can modify the Hessian matrix by adding a positive multiple of the identity matrix to make it positive definite, which is called Goldfeld method.
@@ -111,10 +112,10 @@ def newton_goldfeld(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_sea
             # which is more efficient and numerically stable than computing the inverse of Gk
             dk = jnp.linalg.solve(Gk, -gk)
 
-            # if line_search_name is not None, we can perform line search to find the optimal step size alpha
+            # if line_search_params is not None, we can perform line search to find the optimal step size alpha
             # this is called damped Newton method, which can improve the convergence of the algorithm
-            if line_search_name is not None:
-                alpha, _, _ = line_search_function(objfun, xk, dk, line_search_name)
+            if line_search_params is not None:
+                alpha, _, _ = line_search_function(objfun, xk, dk, line_search_params)
                 xk += alpha * dk
             else:
                 xk += dk
@@ -133,44 +134,7 @@ if __name__ == "__main__":
     x0 = jnp.array([0.0, 0.0])
     # xstar, fstar, k = newton_basic(objfun, x0, epsilon)
     # print(xstar, fstar, k)
-    xstar, fstar, k = newton_goldstein(objfun, x0, epsilon, line_search_name="golden")
+    xstar, fstar, k = newton_goldstein(objfun, x0, epsilon, line_search_params=LineSearchParams(name="golden"))
     print(xstar, fstar, k)
-    xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon, line_search_name="golden")
+    xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon, line_search_params=LineSearchParams(name="golden"))
     print(xstar, fstar, k)
-
-    # @jax.jit
-    # def objfun(x):
-    #     y = x[0] ** 2 + (x[1] - 1.0) ** 4
-    #     return y
-
-    # epsilon = 0.0001
-
-    # ## 第1组
-    # x0 = jnp.array([1.0, 2.0])
-    # xstar, fstar, k = newton_goldstein(objfun, x0, epsilon)
-    # print(xstar, fstar, k)
-
-    # ## 第2组
-    # x0 = jnp.array([-2.0, 3.0])
-    # xstar, fstar, k = newton_goldstein(objfun, x0, epsilon)
-    # print(xstar, fstar, k)
-
-    # ## 第3组
-    # x0 = jnp.array([10.0, -10.0])
-    # xstar, fstar, k = newton_goldstein(objfun, x0, epsilon)
-    # print(xstar, fstar, k)
-
-    # ## 第1组
-    # x0 = jnp.array([1.0, 2.0])
-    # xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon)
-    # print(xstar, fstar, k)
-
-    # ## 第2组
-    # x0 = jnp.array([-2.0, 3.0])
-    # xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon)
-    # print(xstar, fstar, k)
-
-    # ## 第3组
-    # x0 = jnp.array([10.0, -10.0])
-    # xstar, fstar, k = newton_goldfeld(objfun, x0, epsilon)
-    # print(xstar, fstar, k)
