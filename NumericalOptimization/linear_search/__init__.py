@@ -16,6 +16,8 @@ class LineSearchParams:
     b: float = 3.0
     epsilon: float = 1e-3
 
+    h: float = 0.1  # 进退法(chase)步长
+
     # 非精确线搜索参数
     alpha: float = 1.0
     rho: float = 0.3

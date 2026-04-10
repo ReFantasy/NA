@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     x0 = jnp.array([80.0, -30.0])
 
-    line_search_params = linear_search.LineSearchParams(name=linear_search.types.wolf_powell, epsilon=0.00001)
+    line_search_params = linear_search.LineSearchParams(name=linear_search.types.golden, epsilon=0.001)
 
     xstar, fstar, k = optimizer.gradient_methods.newton_goldstein(
         objfun, x0, epsilon=0.001, line_search_params=line_search_params

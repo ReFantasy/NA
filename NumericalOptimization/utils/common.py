@@ -6,131 +6,6 @@ import NumericalAnalysis as na
 from NumericalOptimization.linear_search import LineSearchParams
 
 
-def line_search_function(objfun, xk, dk, line_search_params: LineSearchParams = LineSearchParams()):
-
-    def line_search_method(name="golden"):
-        if name == "golden":
-            return linear_search.golden
-        elif name == "newton":
-            return linear_search.newton
-        elif name == "fibonacci":
-            return linear_search.fibonacci
-        elif name == "armijo_goldstein":
-            return linear_search.armijo_goldstein
-        elif name == "wolf_powell":
-            return linear_search.wolf_powell
-        elif name == "secant":
-            return linear_search.secant
-        elif name == "parabola":
-            return linear_search.parabola
-        elif name == "simple_rule":
-            return linear_search.simple_rule
-        else:
-            raise ValueError("Unknown line search method: {}".format(name))
-
-    method_name = line_search_params.name
-    search = line_search_method(method_name)
-    if method_name == "armijo_goldstein":
-        lambdak, fstar, k = search(
-            objfun=objfun,
-            xk=xk,
-            dk=dk,
-            a0=line_search_params.a,
-            b0=line_search_params.b,
-            alpha0=line_search_params.alpha,
-            rho=line_search_params.rho,
-            t=line_search_params.t,
-        )
-    elif method_name == "wolf_powell":
-        lambdak, fstar, k = search(
-            objfun=objfun,
-            xk=xk,
-            dk=dk,
-            a0=line_search_params.a,
-            b0=line_search_params.b,
-            alpha0=line_search_params.alpha,
-            rho=line_search_params.rho,
-            t=line_search_params.t,
-            sigma=line_search_params.sigma,
-        )
-    elif method_name == "simple_rule":
-        lambdak, fstar, k = search(
-            objfun=objfun,
-            xk=xk,
-            dk=dk,
-            a0=line_search_params.a,
-            b0=line_search_params.b,
-            alpha0=line_search_params.alpha,
-            rho=line_search_params.rho,
-        )
-    else:
-        phi = lambda alpha: objfun(xk + alpha * dk)
-        lambdak, fstar, k = search(phi, line_search_params.a, line_search_params.b, line_search_params.epsilon)
-    return lambdak, fstar, k
-
-
-# def line_search_function(objfun, xk, dk, method_name="golden", a=0.0, b=3.0, init_alpha=1.0, epsilon: float = 0.00001):
-#     """
-#     线搜索算法接口函数，根据指定的算法名称调用相应的线搜索方法。
-#     参数
-#     ----------
-#     objfun : callable
-#         目标函数。
-#     xk : array-like
-#         当前迭代点。
-#     dk : array-like
-#         当前搜索方向。
-#     method_name : str, optional
-#         线搜索方法名称，默认为 "golden"。可选值包括 "golden", "newton", "fibonacci", "armijo_goldstein", "wolf_powell", "secant", "parabola", "simple_rule"。
-#     a : float, optional
-#         初始区间左端点，默认为 0.0。
-#     b : float, optional
-#         初始区间右端点，默认为 3.0。
-#     init_alpha : float, optional
-#         初始试探点，默认为 1.0。
-#     epsilon : float, optional
-#         容忍精度，默认为 0.00001。
-
-#     Returns
-#     -------
-#     tuple[float, float, int]
-#         最优步长 lambdak，最优函数值 fstar，以及迭代次数 k。
-
-#     Notes
-#     -----
-#     该函数根据指定的线搜索方法名称调用相应的算法实现，并返回最优步长、最优函数值和迭代次数。对于 "wolf_powell"、 "armijo_goldstein" 、"simple_rule" 方法，需要传入原始的优化目标函数 objfun、当前迭代点 xk、搜索方向 dk，以及初始区间和试探点等参数。
-#     对于其他方法，需要显示构造一维函数 phi = lambda alpha: objfun(xk + alpha * dk) 来表示沿搜索方向 dk 的函数值，并调用相应的线搜索算法。
-#     """
-
-#     def line_search_method(name="golden"):
-#         if name == "golden":
-#             return linear_search.golden
-#         elif name == "newton":
-#             return linear_search.newton
-#         elif name == "fibonacci":
-#             return linear_search.fibonacci
-#         elif name == "armijo_goldstein":
-#             return linear_search.armijo_goldstein
-#         elif name == "wolf_powell":
-#             return linear_search.wolf_powell
-#         elif name == "secant":
-#             return linear_search.secant
-#         elif name == "parabola":
-#             return linear_search.parabola
-#         elif name == "simple_rule":
-#             return linear_search.simple_rule
-#         else:
-#             raise ValueError("Unknown line search method: {}".format(name))
-
-#     search = line_search_method(method_name)
-#     if method_name == "wolf_powell" or method_name == "armijo_goldstein" or method_name == "simple_rule":
-#         lambdak, fstar, k = search(objfun=objfun, xk=xk, dk=dk, a0=a, b0=b, alpha0=init_alpha)
-#     else:
-#         phi = lambda alpha: objfun(xk + alpha * dk)
-#         lambdak, fstar, k = search(phi, a, b, epsilon)
-#     return lambdak, fstar, k
-
-
 def chase(phi: callable, x_init: float, h: float):
     """
     使用进退法（Bounding Phase Method）寻找一元函数的极小值包含区间。
@@ -215,3 +90,75 @@ def proj_pd(A: jnp.ndarray, delta: float = 1e-2) -> jnp.ndarray:
     while not is_pd(A):
         A += jnp.eye(A.shape[0]) * delta
     return A
+
+
+def line_search_function(objfun, xk, dk, line_search_params: LineSearchParams = LineSearchParams()):
+
+    def line_search_method(name="golden"):
+        if name == "golden":
+            return linear_search.golden
+        elif name == "newton":
+            return linear_search.newton
+        elif name == "fibonacci":
+            return linear_search.fibonacci
+        elif name == "armijo_goldstein":
+            return linear_search.armijo_goldstein
+        elif name == "wolf_powell":
+            return linear_search.wolf_powell
+        elif name == "secant":
+            return linear_search.secant
+        elif name == "parabola":
+            return linear_search.parabola
+        elif name == "simple_rule":
+            return linear_search.simple_rule
+        else:
+            raise ValueError("Unknown line search method: {}".format(name))
+
+    method_name = line_search_params.name
+    search = line_search_method(method_name)
+    if method_name == "armijo_goldstein":
+        lambdak, fstar, k = search(
+            objfun=objfun,
+            xk=xk,
+            dk=dk,
+            a0=line_search_params.a,
+            b0=line_search_params.b,
+            alpha0=line_search_params.alpha,
+            rho=line_search_params.rho,
+            t=line_search_params.t,
+        )
+    elif method_name == "wolf_powell":
+        lambdak, fstar, k = search(
+            objfun=objfun,
+            xk=xk,
+            dk=dk,
+            a0=line_search_params.a,
+            b0=line_search_params.b,
+            alpha0=line_search_params.alpha,
+            rho=line_search_params.rho,
+            t=line_search_params.t,
+            sigma=line_search_params.sigma,
+        )
+    elif method_name == "simple_rule":
+        lambdak, fstar, k = search(
+            objfun=objfun,
+            xk=xk,
+            dk=dk,
+            a0=line_search_params.a,
+            b0=line_search_params.b,
+            alpha0=line_search_params.alpha,
+            rho=line_search_params.rho,
+        )
+    else:
+        phi = lambda alpha: objfun(xk + alpha * dk)
+
+        # 使用进退法寻找包含极小值的区间
+        init_alpha = (line_search_params.a + line_search_params.b) / 2.0
+        (
+            line_search_params.a,
+            line_search_params.b,
+            _,
+        ) = chase(phi, init_alpha, h=line_search_params.h)
+
+        lambdak, fstar, k = search(phi, line_search_params.a, line_search_params.b, line_search_params.epsilon)
+    return lambdak, fstar, k
