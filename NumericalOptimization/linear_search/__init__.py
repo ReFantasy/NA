@@ -1,8 +1,8 @@
 """线搜索算法与参数定义。"""
 
-from dataclasses import dataclass, field
-import sys
-from typing import Callable, Optional
+from dataclasses import dataclass
+
+from .types import LineSearchName
 
 
 @dataclass
@@ -24,6 +24,36 @@ class LineSearchParams:
     sigma: float = 0.5  # Wolf-Powell步长准则特有参数
 
 
+class _LineSearchTypes:
+    __slots__ = ()
+
+    LineSearchName = LineSearchName
+    golden = "golden"
+    fibonacci = "fibonacci"
+    newton = "newton"
+    secant = "secant"
+    parabola = "parabola"
+    armijo_goldstein = "armijo_goldstein"
+    wolf_powell = "wolf_powell"
+    simple_rule = "simple_rule"
+
+    def __dir__(self):
+        return [
+            "LineSearchName",
+            "golden",
+            "fibonacci",
+            "newton",
+            "secant",
+            "parabola",
+            "armijo_goldstein",
+            "wolf_powell",
+            "simple_rule",
+        ]
+
+
+types = _LineSearchTypes()
+
+
 from .golden import *
 from .fibonacci import fibonacci
 from .newton import *
@@ -32,3 +62,9 @@ from .parabola import *
 from .armijo import *
 from .wolf import *
 from .simple_rule import *
+
+__all__ = [
+    "LineSearchParams",
+    "LineSearchName",
+    "types",
+]
