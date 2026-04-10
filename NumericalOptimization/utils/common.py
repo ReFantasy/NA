@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import NumericalAnalysis as na
 
 
-def line_search_function(objfun, xk, dk, method_name="golden", a=0.0, b=3.0, init_alpha=1.0, epsilon: float = 0.00001):
+def line_search_function(objfun, xk, dk, method_name="golden", a=0.0, b=3.0, init_alpha=1.0, epsilon: float = 0.001):
     """
     线搜索算法接口函数，根据指定的算法名称调用相应的线搜索方法。
     参数
