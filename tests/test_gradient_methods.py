@@ -9,7 +9,6 @@ Revisions:
 """
 
 from pytest import approx
-import NumericalOptimization.gradient_methods.gradient_descent as gradient_descent
 from NumericalOptimization import gradient_methods
 import jax
 import jax.numpy as jnp
@@ -45,15 +44,15 @@ class TestGradientDescent:
             print("测试梯度下降法，线搜索方法：", name)
             x0 = jnp.array([1.0, 1.0])
             epsilon = 0.001
-            xstar, _, _ = gradient_descent(self.objfun, x0, epsilon, line_search_name=name)
+            xstar, _, _ = gradient_methods.gradient_descent(self.objfun, x0, epsilon, line_search_name=name)
             assert np.array(xstar) == approx([2.0, -3.0], abs=0.0001)
 
             x0 = jnp.array([-2.0, 3.0])
-            xstar, _, _ = gradient_descent(self.objfun, x0, epsilon, line_search_name=name)
+            xstar, _, _ = gradient_methods.gradient_descent(self.objfun, x0, epsilon, line_search_name=name)
             assert np.array(xstar) == approx([2.0, -3.0], abs=0.0001)
 
             x0 = jnp.array([10.0, -10.0])
-            xstar, _, _ = gradient_descent(self.objfun, x0, epsilon, line_search_name=name)
+            xstar, _, _ = gradient_methods.gradient_descent(self.objfun, x0, epsilon, line_search_name=name)
             assert np.array(xstar) == approx([2.0, -3.0], abs=0.0001)
 
 
