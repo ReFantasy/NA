@@ -11,10 +11,17 @@ def main():
 if __name__ == "__main__":
     jax.config.update("jax_enable_x64", True)
 
-    x0 = jnp.array([90.1, -80.3])
+    objfun = functions.boha2
+
+    x0 = jnp.array([93.2, -87.5])
 
     xstar, fstar, k = optimizer.gradient_methods.gradient_descent(
-        functions.boha1, x0, epsilon=1e-3, line_search_name="golden"
+        objfun, x0, epsilon=1e-7, line_search_name="simple_rule"
+    )
+    print(xstar, fstar, k)
+
+    xstar, fstar, k = optimizer.gradient_methods.newton_goldfeld(
+        objfun, xstar, epsilon=1e-8, line_search_name="simple_rule"
     )
 
     print(xstar, fstar, k)

@@ -44,3 +44,25 @@ def boha1(xx):
 
     y = term1 + term2 + term3 + term4 + 0.7
     return y
+
+
+@jax.jit
+def boha2(xx):
+    x1, x2 = xx
+    term1 = x1**2
+    term2 = 2 * x2**2
+    term3 = -0.3 * jnp.cos(3 * jnp.pi * x1) * jnp.cos(4 * jnp.pi * x2)
+
+    y = term1 + term2 + term3 + 0.3
+    return y
+
+
+@jax.jit
+def boha3(xx):
+    x1, x2 = xx
+    term1 = x1**2
+    term2 = 2 * x2**2
+    term3 = -0.3 * jnp.cos(3 * jnp.pi * x1 + 4 * jnp.pi * x2)
+
+    y = term1 + term2 + term3 + 0.3
+    return y
