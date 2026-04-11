@@ -23,7 +23,7 @@ if __name__ == "__main__":
             phi = lambda alpha: objfun(xk + alpha * dk)
 
             # return linear_search.simple_shrink(phi, alpha0=2.0, scaling=0.7)
-            return linear_search.simple_sampled(phi, a=0.0, b=2.0, num_samples=100)
+            return linear_search.simple_sampled(phi, a=0.0, b=2.0, num_samples=100000000)
 
     search = LineSearchFunction(line_search_params=LineSearchParams(name=linear_search.types.golden, epsilon=0.0001))
 
