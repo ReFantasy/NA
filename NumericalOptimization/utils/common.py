@@ -118,14 +118,39 @@ class LineSearchFunction:
     重载 __call__ 方法，自定义线搜索行为。
     """
 
-    def __init__(self, line_search_params: LineSearchParams = LineSearchParams()):
+    def __init__(self, line_search_params: LineSearchParams = None):
         self.line_search_params = line_search_params
 
     def __call__(self, objfun, xk, dk):
+        """
+        自定义线搜索行为, line_search_params中的参数可以在这里使用。
+
+        参数：
+        ----------
+        objfun : callable
+            优化目标函数。
+        xk : jnp.ndarray
+            当前迭代点。
+        dk : jnp.ndarray
+            搜索方向。
+
+        返回：
+        ----------
+        tuple[float, float, int]
+            包含线搜索结果，元组第一个元素是步长 alpha, 其余元素需要根据具体线搜索方法确定。
+        """
+
+        # 定义 phi 函数，表示沿搜索方向 dk 的一维函数
+        # [optional] phi = jax.jit(lambda alpha: objfun(xk + alpha * dk))
         phi = lambda alpha: objfun(xk + alpha * dk)
 
+        # 直接使用 simple_shrink 进行线搜索，返回结果
+        # 这里可以根据需要替换为其他线搜索方法，例如 golden、armijo_goldstein 等
         return linear_search.simple_shrink(phi)
 
+        # -------------------------------------------------------
+        #                     早期封装方法
+        # -------------------------------------------------------
         # line_search_params = self.line_search_params
         # method_name = line_search_params.name
         # search = line_search_method(method_name)
