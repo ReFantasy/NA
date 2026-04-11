@@ -1,6 +1,6 @@
 import NumericalOptimization.linear_search as linear_search
 import jax.numpy as jnp
-
+import jax
 import NumericalAnalysis as na
 from NumericalOptimization.linear_search import LineSearchParams
 
@@ -115,58 +115,63 @@ def line_search_method(name="golden"):
 class LineSearchFunction:
     """
     线搜索函数类，用于在优化算法中执行线搜索。
-    重载 __call__ 方法，自定义线搜索行为。 
+    重载 __call__ 方法，自定义线搜索行为。
     """
+
     def __init__(self, line_search_params: LineSearchParams = LineSearchParams()):
         self.line_search_params = line_search_params
 
     def __call__(self, objfun, xk, dk):
-        line_search_params = self.line_search_params
-        method_name = line_search_params.name
-        search = line_search_method(method_name)
-        if method_name == "armijo_goldstein":
-            lambdak, fstar, k = search(
-                objfun=objfun,
-                xk=xk,
-                dk=dk,
-                a0=line_search_params.a,
-                b0=line_search_params.b,
-                alpha0=line_search_params.alpha,
-                rho=line_search_params.rho,
-                t=line_search_params.t,
-            )
-        elif method_name == "wolf_powell":
-            lambdak, fstar, k = search(
-                objfun=objfun,
-                xk=xk,
-                dk=dk,
-                a0=line_search_params.a,
-                b0=line_search_params.b,
-                alpha0=line_search_params.alpha,
-                rho=line_search_params.rho,
-                t=line_search_params.t,
-                sigma=line_search_params.sigma,
-            )
-        elif method_name == "simple_rule":
-            lambdak, fstar, k = search(
-                objfun=objfun,
-                xk=xk,
-                dk=dk,
-                a0=line_search_params.a,
-                b0=line_search_params.b,
-                alpha0=line_search_params.alpha,
-                rho=line_search_params.rho,
-            )
-        else:
-            phi = lambda alpha: objfun(xk + alpha * dk)
+        phi = lambda alpha: objfun(xk + alpha * dk)
 
-            # 使用进退法寻找包含极小值的区间
-            init_alpha = (line_search_params.a + line_search_params.b) / 2.0
-            (
-                line_search_params.a,
-                line_search_params.b,
-                _,
-            ) = chase(phi, init_alpha, h=line_search_params.h)
+        return linear_search.simple_shrink(phi)
 
-            lambdak, fstar, k = search(phi, line_search_params.a, line_search_params.b, line_search_params.epsilon)
-        return lambdak, fstar, k
+        # line_search_params = self.line_search_params
+        # method_name = line_search_params.name
+        # search = line_search_method(method_name)
+        # if method_name == "armijo_goldstein":
+        #     lambdak, fstar, k = search(
+        #         objfun=objfun,
+        #         xk=xk,
+        #         dk=dk,
+        #         a0=line_search_params.a,
+        #         b0=line_search_params.b,
+        #         alpha0=line_search_params.alpha,
+        #         rho=line_search_params.rho,
+        #         t=line_search_params.t,
+        #     )
+        # elif method_name == "wolf_powell":
+        #     lambdak, fstar, k = search(
+        #         objfun=objfun,
+        #         xk=xk,
+        #         dk=dk,
+        #         a0=line_search_params.a,
+        #         b0=line_search_params.b,
+        #         alpha0=line_search_params.alpha,
+        #         rho=line_search_params.rho,
+        #         t=line_search_params.t,
+        #         sigma=line_search_params.sigma,
+        #     )
+        # elif method_name == "simple_rule":
+        #     lambdak, fstar, k = search(
+        #         objfun=objfun,
+        #         xk=xk,
+        #         dk=dk,
+        #         a0=line_search_params.a,
+        #         b0=line_search_params.b,
+        #         alpha0=line_search_params.alpha,
+        #         rho=line_search_params.rho,
+        #     )
+        # else:
+        #     phi = lambda alpha: objfun(xk + alpha * dk)
+
+        #     # 使用进退法寻找包含极小值的区间
+        #     init_alpha = (line_search_params.a + line_search_params.b) / 2.0
+        #     (
+        #         line_search_params.a,
+        #         line_search_params.b,
+        #         _,
+        #     ) = chase(phi, init_alpha, h=line_search_params.h)
+
+        #     lambdak, fstar, k = search(phi, line_search_params.a, line_search_params.b, line_search_params.epsilon)
+        # return lambdak, fstar, k

@@ -14,7 +14,7 @@ def main():
 if __name__ == "__main__":
     jax.config.update("jax_enable_x64", True)
 
-    objfun = functions.boha2
+    objfun = functions.boha3
 
     x0 = jnp.array([80.0, -30.0])
 
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     )
     print(xstar, fstar, k)
 
-    # 重载线搜索函数，使用黄金分割法进行线搜索
+    # 重载线搜索函数
     class LineSearchFunction(utils.LineSearchFunction):
         def __init__(self, line_search_params: LineSearchParams = LineSearchParams()):
             self.line_search_params = line_search_params
@@ -36,19 +36,7 @@ if __name__ == "__main__":
         def __call__(self, objfun, xk, dk):
             phi = lambda alpha: objfun(xk + alpha * dk)
 
-            init_alpha = (self.line_search_params.a + self.line_search_params.b) / 2.0
-            (
-                self.line_search_params.a,
-                self.line_search_params.b,
-                _,
-            ) = utils.chase(phi, init_alpha, h=self.line_search_params.h)
-
-            return linear_search.golden(
-                phi=phi,
-                a=self.line_search_params.a,
-                b=self.line_search_params.b,
-                epsilon=self.line_search_params.epsilon,
-            )
+            return linear_search.simple_shrink(phi, alpha0=1.0, scaling=0.7)
 
     search = LineSearchFunction(line_search_params=LineSearchParams(name=linear_search.types.golden, epsilon=0.0001))
     xstar, fstar, k = optimizer.gradient_methods.conjugate_gradient(
