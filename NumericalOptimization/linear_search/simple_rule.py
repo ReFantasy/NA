@@ -12,7 +12,6 @@ def simple_rule(objfun, xk, dk, a0=0.0, b0=sys.float_info.max, alpha0=1.0, rho=0
         return y
 
     t = 0.9
-
     _, _, alphal = a0, b0, alpha0
     l = 0
 
@@ -26,16 +25,14 @@ def simple_rule(objfun, xk, dk, a0=0.0, b0=sys.float_info.max, alpha0=1.0, rho=0
 
 
 def simple_shrink(phi: callable, alpha0=1.0, scaling=0.7):
-
     alphal = alpha0
-    l = 0
+    k = 0
     while phi(alphal) > phi(0):
         alphal *= scaling
-        l += 1
+        k += 1
 
-        if l > 10000:
+        if k > 10000:
             # print("Warning: simple_shrink did not converge after 10000 iterations.")
             break
 
-    error = phi(0) - phi(alphal)
-    return alphal, l, error
+    return alphal, phi(alphal), k
