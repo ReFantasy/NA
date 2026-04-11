@@ -4,7 +4,7 @@ from NumericalOptimization import linear_search
 from NumericalOptimization.linear_search import LineSearchParams
 from NumericalOptimization.utils import line_search_function
 
-## 共轭梯度法(对一般函数带重启机制)
+# 共轭梯度法(对一般函数带重启机制)
 def conjugate_gradient(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_params: LineSearchParams = None):
     if gradfun is None:
         gradfun = jax.jit(jax.grad(objfun))
@@ -30,11 +30,11 @@ def conjugate_gradient(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_
 
         #lambdak = -jnp.dot(gk,dk)/jnp.dot(dk,jnp.dot(A,dk))
         if line_search_params is not None:
-            lambdak, _, _ = line_search_function(objfun, xk, dk, line_search_params)
+            alpha_k, _, _ = line_search_function(objfun, xk, dk, line_search_params)
         else:
-            lambdak = -jnp.dot(gk,dk)/jnp.dot(dk,jnp.dot(A,dk))
+            alpha_k = -jnp.dot(gk,dk)/jnp.dot(dk,jnp.dot(A,dk))
 
-        xk += lambdak*dk            # 迭代
+        xk += alpha_k*dk            # 迭代
         dk_old = dk
         k += 1
     
@@ -46,24 +46,24 @@ def conjugate_gradient(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_
                 xstar = xk
                 fstar = objfun(xk)
                 return xstar,fstar,k
-            else:
-                                    # 计算系数beta
-                betak = jnp.dot(dk_old,jnp.dot(A,gk))/jnp.dot(dk,jnp.dot(A,dk_old))
-                                    # 搜索方向
-                dk = -gk+betak*dk_old
+            else:                
+                betak = jnp.dot(dk_old,jnp.dot(A,gk))/jnp.dot(dk,jnp.dot(A,dk_old)) # 计算系数beta
+                                    
+                dk = -gk + betak * dk_old # 搜索方向
                 
                 #lambdak = -jnp.dot(gk,dk)/jnp.dot(dk,jnp.dot(A,dk))
                 if line_search_params is not None:
-                    lambdak, _, _ = line_search_function(objfun, xk, dk, line_search_params)
+                    alpha_k, _, _ = line_search_function(objfun, xk, dk, line_search_params)
                 else:
-                    lambdak = -jnp.dot(gk,dk)/jnp.dot(dk,jnp.dot(A,dk))
+                    alpha_k = -jnp.dot(gk,dk)/jnp.dot(dk,jnp.dot(A,dk))
 
-                xk += lambdak*dk    # 迭代
+                xk += alpha_k * dk    # 迭代
                 dk_old = dk
                 k += 1
                 
                 if jnp.mod(k,dim)==0:# 重启共轭梯度法
                     break
+
 
 if __name__ == '__main__':
     from NumericalOptimization import linear_search
