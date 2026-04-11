@@ -14,7 +14,7 @@ def main():
 if __name__ == "__main__":
     jax.config.update("jax_enable_x64", True)
 
-    objfun = functions.boha3
+    objfun = functions.boha2
 
     x0 = jnp.array([80.0, -30.0])
 

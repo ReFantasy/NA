@@ -43,14 +43,11 @@ class TestGradientDescent:
         y = 4 * (x[0] - 2) ** 2 + 9 * (x[1] + 3) ** 2
         return y
 
-    # 黄金分割法
     def test_gradient_descent(self):
-        epsilon2 = 0.00001
-
         for name in linear_search_names:
             print("测试梯度下降法，线搜索方法：", name)
             linear_search_strategy = utils.LineSearchFunction(
-                line_search_params=LineSearchParams(name=name, epsilon=epsilon2)
+                line_search_params=None  # LineSearchParams(name=name, epsilon=0.00001)
             )
 
             x0 = jnp.array([1.0, 1.0])
@@ -89,7 +86,7 @@ class TestNewton:
         for name in linear_search_names:
             print("测试牛顿法，线搜索方法：", name)
             linear_search_strategy = utils.LineSearchFunction(
-                line_search_params=LineSearchParams(name=name, epsilon=epsilon)
+                line_search_params=None  # LineSearchParams(name=name, epsilon=epsilon)
             )
 
             x0 = jnp.array([1.0, 1.0])
@@ -114,7 +111,7 @@ class TestNewton:
         for name in linear_search_names:
             print("测试牛顿法，线搜索方法：", name)
             linear_search_strategy = utils.LineSearchFunction(
-                line_search_params=LineSearchParams(name=name, epsilon=epsilon)
+                line_search_params=None  # LineSearchParams(name=name, epsilon=epsilon)
             )
             x0 = jnp.array([1.0, 1.0])
             epsilon = 0.001
@@ -142,7 +139,7 @@ class TestNewton:
 
 
 class TestConjugateGradient:
-    class LineSearchFunction:
+    class LineSearchFunction(utils.LineSearchFunction):
         def __init__(self, line_search_params: LineSearchParams = LineSearchParams()):
             self.line_search_params = line_search_params
 
