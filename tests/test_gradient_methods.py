@@ -10,10 +10,12 @@ Revisions:
 
 from pytest import approx
 from NumericalOptimization import gradient_methods
+from NumericalOptimization import linear_search
 import jax
 import jax.numpy as jnp
 import numpy as np
 from NumericalOptimization.linear_search import LineSearchParams
+from NumericalOptimization.utils import functions
 
 jax.config.update("jax_enable_x64", True)
 
@@ -118,3 +120,20 @@ class TestNewton:
                 self.objfun, x0, epsilon, line_search_params=LineSearchParams(name=name, epsilon=epsilon)
             )
             assert np.array(xstar) == approx([0.6958, -1.3479], abs=0.001)
+
+
+# ---------------------------------------------------------------------
+#                           共轭梯度法
+# ---------------------------------------------------------------------
+class TestConjugateGradient:
+    # 黄金分割法
+    def test_conjugate_gradient(self):
+        x0 = jnp.array([80.0, -30.0])
+
+        xstar, fstar, k = gradient_methods.conjugate_gradient(
+            functions.boha2,
+            x0,
+            epsilon=0.001,
+            line_search_params=linear_search.LineSearchParams(name=linear_search.types.golden, epsilon=0.0001),
+        )
+        assert np.array(xstar) == approx([0.0, 0.0], abs=0.001)

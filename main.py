@@ -12,14 +12,23 @@ def main():
 if __name__ == "__main__":
     jax.config.update("jax_enable_x64", True)
 
-    objfun = functions.boha1
+    objfun = functions.boha2
 
     x0 = jnp.array([80.0, -30.0])
 
-    line_search_params = linear_search.LineSearchParams(name=linear_search.types.golden, epsilon=0.001)
-
     xstar, fstar, k = optimizer.gradient_methods.newton_goldstein(
-        objfun, x0, epsilon=0.001, line_search_params=line_search_params
+        objfun,
+        x0,
+        epsilon=0.001,
+        line_search_params=linear_search.LineSearchParams(name=linear_search.types.golden, epsilon=0.0001),
+    )
+    print(xstar, fstar, k)
+
+    xstar, fstar, k = optimizer.gradient_methods.conjugate_gradient(
+        objfun,
+        x0,
+        epsilon=0.001,
+        line_search_params=linear_search.LineSearchParams(name=linear_search.types.golden, epsilon=0.0001),
     )
 
     print(xstar, fstar, k)
