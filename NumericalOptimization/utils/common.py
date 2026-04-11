@@ -113,6 +113,10 @@ def line_search_method(name="golden"):
 
 
 class LineSearchFunction:
+    """
+    线搜索函数类，用于在优化算法中执行线搜索。
+    重载 __call__ 方法，自定义线搜索行为。 
+    """
     def __init__(self, line_search_params: LineSearchParams = LineSearchParams()):
         self.line_search_params = line_search_params
 
