@@ -24,7 +24,7 @@ def simple_rule(objfun, xk, dk, a0=0.0, b0=sys.float_info.max, alpha0=1.0, rho=0
             l += 1
 
 
-def simple_shrink(phi: callable, alpha0=1.0, scaling=0.7):
+def simple_shrink(phi: callable, alpha0=2.0, scaling=0.7):
     alphal = alpha0
     k = 0
     while phi(alphal) > phi(0):

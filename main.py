@@ -14,20 +14,6 @@ def main():
 if __name__ == "__main__":
     jax.config.update("jax_enable_x64", True)
 
-    objfun = functions.boha2
-
-    x0 = jnp.array([80.0, -30.0])
-
-    xstar, fstar, k = optimizer.gradient_methods.newton_goldstein(
-        objfun,
-        x0,
-        epsilon=0.001,
-        line_search_function=utils.LineSearchFunction(
-            line_search_params=LineSearchParams(name=linear_search.types.golden, epsilon=0.0001)
-        ),
-    )
-    print(xstar, fstar, k)
-
     # 重载线搜索函数
     class LineSearchFunction(utils.LineSearchFunction):
         def __init__(self, line_search_params: LineSearchParams = LineSearchParams()):
@@ -36,13 +22,30 @@ if __name__ == "__main__":
         def __call__(self, objfun, xk, dk):
             phi = lambda alpha: objfun(xk + alpha * dk)
 
-            return linear_search.simple_shrink(phi, alpha0=1.0, scaling=0.7)
+            return linear_search.simple_shrink(phi, alpha0=2.0, scaling=0.7)
 
     search = LineSearchFunction(line_search_params=LineSearchParams(name=linear_search.types.golden, epsilon=0.0001))
+
+    objfun = functions.boha2
+
+    x0 = jnp.array([80.0, -30.0])
+
+    xstar, fstar, k = optimizer.gradient_methods.newton_goldstein(
+        objfun,
+        x0,
+        epsilon=0.0001,
+        # line_search_function=utils.LineSearchFunction(
+        #     line_search_params=LineSearchParams(name=linear_search.types.golden, epsilon=0.0001)
+        # ),
+        line_search_function=search,
+    )
+    print(xstar, fstar, k)
+
+    
     xstar, fstar, k = optimizer.gradient_methods.conjugate_gradient(
         objfun,
         x0,
-        epsilon=0.001,
+        epsilon=0.0001,
         line_search_function=search,
     )
 
