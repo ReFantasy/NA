@@ -47,7 +47,7 @@ def conjugate_gradient(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_
                 fstar = objfun(xk)
                 return xstar,fstar,k
             else:                
-                betak = jnp.dot(dk_old,jnp.dot(A,gk))/jnp.dot(dk,jnp.dot(A,dk_old)) # 计算系数beta
+                betak = jnp.dot(dk_old, jnp.dot(A, gk)) / jnp.dot(dk_old, jnp.dot(A, dk_old)) # 计算系数beta
                                     
                 dk = -gk + betak * dk_old # 搜索方向
                 
