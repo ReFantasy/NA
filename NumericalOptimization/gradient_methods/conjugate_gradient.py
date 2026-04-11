@@ -28,11 +28,10 @@ def conjugate_gradient(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_
         dk = -gk                    # 第一次使用负梯度方向
                                     # 搜索步长
 
-        #lambdak = -jnp.dot(gk,dk)/jnp.dot(dk,jnp.dot(A,dk))
         if line_search_params is not None:
             alpha_k, _, _ = line_search_function(objfun, xk, dk, line_search_params)
         else:
-            alpha_k = -jnp.dot(gk,dk)/jnp.dot(dk,jnp.dot(A,dk))
+            alpha_k = -jnp.dot(gk, dk) / jnp.dot(dk, jnp.dot(A, dk))
 
         xk += alpha_k*dk            # 迭代
         dk_old = dk
@@ -51,11 +50,10 @@ def conjugate_gradient(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_
                                     
                 dk = -gk + betak * dk_old # 搜索方向
                 
-                #lambdak = -jnp.dot(gk,dk)/jnp.dot(dk,jnp.dot(A,dk))
                 if line_search_params is not None:
                     alpha_k, _, _ = line_search_function(objfun, xk, dk, line_search_params)
                 else:
-                    alpha_k = -jnp.dot(gk,dk)/jnp.dot(dk,jnp.dot(A,dk))
+                    alpha_k = -jnp.dot(gk, dk) / jnp.dot(dk, jnp.dot(A, dk))
 
                 xk += alpha_k * dk    # 迭代
                 dk_old = dk
