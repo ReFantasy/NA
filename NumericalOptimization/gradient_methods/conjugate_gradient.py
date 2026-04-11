@@ -1,12 +1,9 @@
 import jax
 import jax.numpy as jnp
-from NumericalOptimization import linear_search
-from NumericalOptimization.linear_search import LineSearchParams
-from NumericalOptimization.utils import line_search_function
 
 
 # 共轭梯度法(对一般函数带重启机制)
-def conjugate_gradient(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_params: LineSearchParams = None):
+def conjugate_gradient(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_function: callable = None):
     """
     优先选用精确线搜索方法或强Wolfe条件线搜索方法保证共轭梯度法的收敛性。
     """
@@ -33,8 +30,8 @@ def conjugate_gradient(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_
         dk = -gk  # 第一次使用负梯度方向
 
         # 搜索步长
-        if line_search_params is not None:
-            alpha_k, _, _ = line_search_function(objfun, xk, dk, line_search_params)
+        if line_search_function is not None:
+            alpha_k, _, _ = line_search_function(objfun, xk, dk)
         else:
             alpha_k = -jnp.dot(gk, dk) / jnp.dot(dk, jnp.dot(A, dk))
 
@@ -58,8 +55,8 @@ def conjugate_gradient(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_
 
                 dk = -gk + betak * dk_old  # 搜索方向
 
-                if line_search_params is not None:
-                    alpha_k, _, _ = line_search_function(objfun, xk, dk, line_search_params)
+                if line_search_function is not None:
+                    alpha_k, _, _ = line_search_function(objfun, xk, dk)
                 else:
                     alpha_k = -jnp.dot(gk, dk) / jnp.dot(dk, jnp.dot(A, dk))
 
@@ -98,7 +95,7 @@ if __name__ == "__main__":
             objfun,
             x0,
             epsilon,
-            line_search_params=linear_search.LineSearchParams(name=linear_search.types.golden, epsilon=0.001),
+            # line_search_params=linear_search.LineSearchParams(name=linear_search.types.golden, epsilon=0.001),
         )
         x0_str = numpy.array2string(x0, precision=2, floatmode="fixed")
         xstar_str = numpy.array2string(xstar, precision=6, floatmode="fixed")

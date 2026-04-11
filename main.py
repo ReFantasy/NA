@@ -3,6 +3,8 @@ import jax
 import jax.numpy as jnp
 from NumericalOptimization.utils import functions
 from NumericalOptimization import linear_search
+from NumericalOptimization import utils
+from NumericalOptimization.linear_search import LineSearchParams
 
 
 def main():
@@ -20,15 +22,40 @@ if __name__ == "__main__":
         objfun,
         x0,
         epsilon=0.001,
-        line_search_params=linear_search.LineSearchParams(name=linear_search.types.golden, epsilon=0.0001),
+        line_search_function=utils.LineSearchFunction(
+            line_search_params=LineSearchParams(name=linear_search.types.golden, epsilon=0.0001)
+        ),
     )
     print(xstar, fstar, k)
 
+    # 重载线搜索函数，使用黄金分割法进行线搜索
+    class LineSearchFunction(utils.LineSearchFunction):
+        def __init__(self, line_search_params: LineSearchParams = LineSearchParams()):
+            self.line_search_params = line_search_params
+
+        def __call__(self, objfun, xk, dk):
+            phi = lambda alpha: objfun(xk + alpha * dk)
+
+            init_alpha = (self.line_search_params.a + self.line_search_params.b) / 2.0
+            (
+                self.line_search_params.a,
+                self.line_search_params.b,
+                _,
+            ) = utils.chase(phi, init_alpha, h=self.line_search_params.h)
+
+            return linear_search.golden(
+                phi=phi,
+                a=self.line_search_params.a,
+                b=self.line_search_params.b,
+                epsilon=self.line_search_params.epsilon,
+            )
+
+    search = LineSearchFunction(line_search_params=LineSearchParams(name=linear_search.types.golden, epsilon=0.0001))
     xstar, fstar, k = optimizer.gradient_methods.conjugate_gradient(
         objfun,
         x0,
         epsilon=0.001,
-        line_search_params=linear_search.LineSearchParams(name=linear_search.types.golden, epsilon=0.0001),
+        line_search_function=search,
     )
 
     print(xstar, fstar, k)
