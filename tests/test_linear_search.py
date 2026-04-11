@@ -132,3 +132,24 @@ class TestInexactLineSearch:
         a0, b0, alpha0 = 0.0, 20.0, 10.0  # 初始区间和初始试探点
         alpha, _, _ = linear_search.simple_rule(self.objfun, xk, dk, a0, b0, alpha0)
         assert alpha == approx(0.6461, abs=1e-3)
+
+
+# ---------------------------------------------------------------------
+#                            采样法测试
+# ---------------------------------------------------------------------
+class TestSampledMethods:
+    @staticmethod
+    def phi(x):
+        y = math.e ** (-x) + x**2
+        return y
+
+    # 采样法
+    def test_sampled(self):
+        a = -4.0  # 初始区间左端点
+        b = 4.0  # 初始区间右端点
+        epsilon = 0.00001  # 容忍精度
+        # alpha, _, _ = linear_search.newton(self.phi, a, b, epsilon)
+        # assert alpha == approx(0.35173371, abs=1e-7)
+        alpha, _, _ = linear_search.simple_sampled(self.phi, a, b, num_samples=20000)  # int((b-a)/epsilon)
+        # print(alpha)
+        assert alpha == approx(0.35173371, abs=1e-3)

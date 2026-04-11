@@ -22,7 +22,8 @@ if __name__ == "__main__":
         def __call__(self, objfun, xk, dk):
             phi = lambda alpha: objfun(xk + alpha * dk)
 
-            return linear_search.simple_shrink(phi, alpha0=2.0, scaling=0.7)
+            # return linear_search.simple_shrink(phi, alpha0=2.0, scaling=0.7)
+            return linear_search.simple_sampled(phi, a=0.0, b=2.0, num_samples=100)
 
     search = LineSearchFunction(line_search_params=LineSearchParams(name=linear_search.types.golden, epsilon=0.0001))
 
@@ -40,13 +41,12 @@ if __name__ == "__main__":
         line_search_function=search,
     )
     print(xstar, fstar, k)
-
-    
-    xstar, fstar, k = optimizer.gradient_methods.conjugate_gradient(
-        objfun,
-        x0,
-        epsilon=0.0001,
-        line_search_function=search,
-    )
+    while True:
+        xstar, fstar, k = optimizer.gradient_methods.conjugate_gradient(
+            objfun,
+            x0,
+            epsilon=0.0001,
+            line_search_function=search,
+        )
 
     print(xstar, fstar, k)

@@ -36,3 +36,29 @@ def simple_shrink(phi: callable, alpha0=2.0, scaling=0.7):
             break
 
     return alphal, phi(alphal), k
+
+
+def simple_sampled(phi: callable, a=0.0, b=3.0, num_samples=1000):
+    """
+    使用均匀采样法在一维区间内寻找函数的近似极小值。
+
+    参数:
+        phi (callable): 接受单个标量输入并返回其函数值的一维目标函数。
+        a (float, optional): 采样区间的起点。默认值为 0.0。
+        b (float, optional): 采样区间的终点。默认值为 3.0。
+        num_samples (int, optional): 采样点的总数。默认值为 1000。
+
+    返回:
+        tuple: 包含三个结果的元组
+            - float: 使得函数值最小的 alpha 值。
+            - float: 找到的最小函数值。
+            - int: 使用的采样点总数。
+    """
+
+    while phi(b) < phi(0):
+        b *= 1.1
+
+    alphas = jnp.linspace(a, b, num_samples)
+    phis = jax.vmap(phi)(alphas)
+    min_idx = jnp.argmin(phis)
+    return alphas[min_idx], phis[min_idx], num_samples
