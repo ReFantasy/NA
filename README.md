@@ -13,3 +13,10 @@ uv run example/nle_newton.py
 ```bash
 uv run pytest
 ```
+
+project/
+├── src/
+│   ├── main.py
+│   └── utils/
+│       └── helper.py
+└── README.md
