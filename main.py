@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     x0 = jnp.array([80.0, -30.0])
 
-    xstar, fstar, k = optimizer.gradient_methods.newton_goldstein(
+    xstar, fstar, k = optimizer.gradient_methods.newton_goldfeld(
         objfun,
         x0,
         epsilon=0.0001,
