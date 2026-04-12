@@ -14,7 +14,6 @@ def newton_basic(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search
     xk = x0
     k = 0
     while True:
-        k += 1
         gk = gradfun(xk)
         if jnp.linalg.norm(gk) <= epsilon:
             xstar = xk
@@ -37,6 +36,7 @@ def newton_basic(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search
                 xk += alpha * dk
             else:
                 xk += dk
+            k += 1
 
 
 def newton_goldstein(objfun, x0, epsilon, gradfun=None, hessianfun=None, line_search_function: callable = None):

@@ -1,9 +1,6 @@
-import jax
-import jax.numpy as jnp
-
 # -------------------------------------------------------------------------
 #
-# BOHACHEVSKY FUNCTION 1
+# SIX-HUMP CAMEL FUNCTION
 #
 # Authors: Sonja Surjanovic, Simon Fraser University
 #          Derek Bingham, Simon Fraser University
@@ -27,50 +24,38 @@ import jax.numpy as jnp
 #
 # -------------------------------------------------------------------------
 #
-# INPUT:
+# INPUTS:
 #
 # xx = [x1, x2]
 #
 # -------------------------------------------------------------------------
 
-
-@jax.jit
-def boha1(xx):
-    x1, x2 = xx
-    term1 = x1**2
-    term2 = 2 * x2**2
-    term3 = -0.3 * jnp.cos(3 * jnp.pi * x1)
-    term4 = -0.4 * jnp.cos(4 * jnp.pi * x2)
-
-    y = term1 + term2 + term3 + term4 + 0.7
-    return y
+import jax
+import jax.numpy as jnp
 
 
 @jax.jit
-def boha2(xx):
+def camel6(xx):
     x1, x2 = xx
-    term1 = x1**2
-    term2 = 2 * x2**2
-    term3 = -0.3 * jnp.cos(3 * jnp.pi * x1) * jnp.cos(4 * jnp.pi * x2)
+    term1 = (4 - 2.1 * x1**2 + (x1**4) / 3) * x1**2
+    term2 = x1 * x2
+    term3 = (-4 + 4 * x2**2) * x2**2
 
-    y = term1 + term2 + term3 + 0.3
-    return y
-
-
-@jax.jit
-def boha3(xx):
-    x1, x2 = xx
-    term1 = x1**2
-    term2 = 2 * x2**2
-    term3 = -0.3 * jnp.cos(3 * jnp.pi * x1 + 4 * jnp.pi * x2)
-
-    y = term1 + term2 + term3 + 0.3
+    y = term1 + term2 + term3
     return y
 
 
 if __name__ == "__main__":
+    import NumericalOptimization as optimizer
+    from NumericalOptimization.utils import LineSearchFunction
     from NumericalOptimization.utils.draw import draw2d
 
-    draw2d(boha1, x_range=(-100, 100), y_range=(-100, 100), samples_x=200, samples_y=200)
-    # draw2d(boha2, x_range=(-100,100), y_range=(-100,100), samples_x=200, samples_y=200)
-    # draw2d(boha3, x_range=(-100,100), y_range=(-100,100), samples_x=200, samples_y=200)
+    xstar, fstar, k = optimizer.gradient_methods.quasi_newton(
+        camel6,
+        jnp.array([-2.5, 2.0]),
+        epsilon=1e-6,
+        line_search_function=LineSearchFunction(),
+    )
+    print(f"xstar: {xstar}, fstar: {fstar}, k: {k}")
+
+    draw2d(camel6, x_range=(-2, 2), y_range=(-1, 1), samples_x=120, samples_y=60)

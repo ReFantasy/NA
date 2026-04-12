@@ -22,32 +22,33 @@ if __name__ == "__main__":
         def __call__(self, objfun, xk, dk):
             phi = lambda alpha: objfun(xk + alpha * dk)
 
-            #return linear_search.simple_shrink(phi, alpha0=2.0, scaling=0.7)
-            return linear_search.simple_sampled(phi, a=0.0, b=2.0, num_samples=30000)
+            return linear_search.simple_shrink(phi, alpha0=3.0, scaling=0.5)
+            # return linear_search.simple_sampled(phi, a=0.0, b=3.0, num_samples=6000)
 
     search = LineSearchFunction(line_search_params=LineSearchParams(name=linear_search.types.golden, epsilon=0.0001))
 
-    objfun = functions.boha1
+    objfun = functions.boha3
 
     x0 = jnp.array([80.0, -30.0])
+    epsilon = 0.0001
 
-    xstar, fstar, k = optimizer.gradient_methods.newton_goldfeld(
+    xstar, fstar, k = optimizer.gradient_methods.newton_goldstein(
         objfun,
         x0,
-        epsilon=0.0001,
-        # line_search_function=utils.LineSearchFunction(
-        #     line_search_params=LineSearchParams(name=linear_search.types.golden, epsilon=0.0001)
-        # ),
+        epsilon=epsilon,
         line_search_function=search,
     )
     print(xstar, fstar, k)
 
-    
     xstar, fstar, k = optimizer.gradient_methods.conjugate_gradient(
         objfun,
         x0,
-        epsilon=0.0001,
+        epsilon=epsilon,
         line_search_function=search,
     )
+
+    print(xstar, fstar, k)
+
+    xstar, fstar, k = optimizer.gradient_methods.quasi_newton(objfun, x0, epsilon=epsilon, line_search_function=search)
 
     print(xstar, fstar, k)
