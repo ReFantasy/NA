@@ -17,7 +17,7 @@ uv run pytest
 ## Directory
 ```
 project/
-├── NumericalAnalysis/     数值计算源码
+├── NumericalAnalysis/      数值计算源码
 │   ├── Eigen/
 │   │   └── qr.py
 │   └── utils.py
