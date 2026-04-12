@@ -14,9 +14,14 @@ uv run example/nle_newton.py
 uv run pytest
 ```
 
+## Directory
+```
 project/
-├── src/
-│   ├── main.py
-│   └── utils/
-│       └── helper.py
+├── NumericalAnalysis/     数值计算源码
+│   ├── Eigen/
+│   │   └── qr.py
+│   └── utils.py
+│       
+├── NumericalOptimization/  数值优化源码
 └── README.md
+```
