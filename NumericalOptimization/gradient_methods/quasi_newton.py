@@ -34,17 +34,33 @@ def quasi_newton(objfun, x0, epsilon, gradfun=None, type: str = "BFGS", line_sea
 
             pk = xk_old - xk  # 位移
             qk = gk_old - gk  # 梯度差
-            pk = jnp.expand_dims(pk, axis=0)
-            qk = jnp.expand_dims(qk, axis=0)
 
-            # Hk_DFP
-            if type == "DFP":
-                Hk += (pk.T @ pk) / (pk @ qk.T) - (Hk @ qk.T @ qk @ Hk) / (qk @ Hk @ qk.T)
-            # Hk_BFGS
-            elif type == "BFGS":
-                Hk += ((1.0 + qk @ Hk @ qk.T) / (pk @ qk.T)) * ((pk.T @ pk) / (pk @ qk.T)) - (
-                    (pk.T @ qk @ Hk + Hk @ qk.T @ pk) / (pk @ qk.T)
+            ####################################################################################
+            # pk = jnp.expand_dims(pk, axis=0)
+            # qk = jnp.expand_dims(qk, axis=0)
+            # # Hk_DFP
+            # if type == "DFP":
+            #     Hk += (pk.T @ pk) / (pk @ qk.T) - (Hk @ qk.T @ qk @ Hk) / (qk @ Hk @ qk.T)
+            # # Hk_BFGS
+            # elif type == "BFGS":
+            #     Hk += ((1.0 + qk @ Hk @ qk.T) / (pk @ qk.T)) * ((pk.T @ pk) / (pk @ qk.T)) - (
+            #         (pk.T @ qk @ Hk + Hk @ qk.T @ pk) / (pk @ qk.T)
+            #     )
+            ####################################################################################
+
+            pk = jnp.reshape(pk, (-1, 1))
+            qk = jnp.reshape(qk, (-1, 1))
+            if type == "SR1":
+                p_Hq = pk - jnp.dot(Hk, qk)
+                Hk += jnp.dot(p_Hq, p_Hq.T) / jnp.dot(p_Hq.T, qk)
+            elif type == "DFP":
+                Hk += jnp.dot(pk, pk.T) / jnp.dot(pk.T, qk) - jnp.dot(Hk, jnp.dot(qk, jnp.dot(qk.T, Hk))) / jnp.dot(
+                    qk.T, jnp.dot(Hk, qk)
                 )
+            elif type == "BFGS":
+                Hk += ((1.0 + jnp.dot(qk.T, jnp.dot(Hk, qk))) / (jnp.dot(pk.T, qk))) * (
+                    (jnp.dot(pk, pk.T)) / (jnp.dot(pk.T, qk))
+                ) - (jnp.dot(pk, jnp.dot(qk.T, Hk)) + jnp.dot(Hk, jnp.dot(qk, pk.T))) / (jnp.dot(pk.T, qk))
 
             k += 1
 
@@ -75,20 +91,20 @@ if __name__ == "__main__":
     search = LineSearchFunction()
 
     # search = NumericalOptimization.utils.LineSearchFunction()
-
+    type = "SR1"
     ## 第1组
     x0 = jnp.array([2.0, 1.0])
-    xstar, fstar, k = quasi_newton(objfun, x0, epsilon, line_search_function=search)
+    xstar, fstar, k = quasi_newton(objfun, x0, epsilon, line_search_function=search, type=type)
     print(xstar, fstar, k)
 
     ## 第2组
     x0 = jnp.array([-2.0, 3.0])
-    xstar, fstar, k = quasi_newton(objfun, x0, epsilon, line_search_function=search)
+    xstar, fstar, k = quasi_newton(objfun, x0, epsilon, line_search_function=search, type=type)
     print(xstar, fstar, k)
 
     ## 第3组
     x0 = jnp.array([-3.0, 2.0])
-    xstar, fstar, k = quasi_newton(objfun, x0, epsilon, line_search_function=search)
+    xstar, fstar, k = quasi_newton(objfun, x0, epsilon, line_search_function=search, type=type)
     print(xstar, fstar, k)
 
     # [0.99997687 0.99990834] 1.2449352847303168e-08 18

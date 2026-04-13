@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     search = LineSearchFunction(line_search_params=LineSearchParams(name=linear_search.types.golden, epsilon=0.0001))
 
-    objfun = functions.boha3
+    objfun = functions.boha1
 
     x0 = jnp.array([80.0, -30.0])
     epsilon = 0.0001
@@ -49,6 +49,8 @@ if __name__ == "__main__":
 
     print(xstar, fstar, k)
 
-    xstar, fstar, k = optimizer.gradient_methods.quasi_newton(objfun, x0, epsilon=epsilon, line_search_function=search)
+    xstar, fstar, k = optimizer.gradient_methods.quasi_newton(
+        objfun, x0, epsilon=epsilon, line_search_function=search, type="BFGS"
+    )
 
     print(xstar, fstar, k)
