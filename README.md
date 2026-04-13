@@ -1,7 +1,7 @@
 # 数值计算及最优化理论算法实现 🏗️ 
 
 ## 安装和运行
-Install [uv](https://uv.doczh.com) 
+构建工具: [uv](https://uv.doczh.com) 
 
 ```bash
 uv sync
