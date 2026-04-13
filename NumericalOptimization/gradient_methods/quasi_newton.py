@@ -91,7 +91,7 @@ if __name__ == "__main__":
     search = LineSearchFunction()
 
     # search = NumericalOptimization.utils.LineSearchFunction()
-    type = "SR1"
+    type = "BFGS"
     ## 第1组
     x0 = jnp.array([2.0, 1.0])
     xstar, fstar, k = quasi_newton(objfun, x0, epsilon, line_search_function=search, type=type)
