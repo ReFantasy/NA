@@ -1,5 +1,5 @@
-# NumericalAnalysis(NA)
-数值计算及最优化理论算法实现
+# 数值计算及最优化理论算法实现(NumericalMethod) 🏗️ 
+
 ## Build and Run
 Install [uv](https://uv.doczh.com) 
 
