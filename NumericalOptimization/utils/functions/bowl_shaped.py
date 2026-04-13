@@ -1,6 +1,3 @@
-import jax
-import jax.numpy as jnp
-
 # -------------------------------------------------------------------------
 #
 # BOHACHEVSKY FUNCTION 1
@@ -33,6 +30,8 @@ import jax.numpy as jnp
 #
 # -------------------------------------------------------------------------
 
+import jax
+import jax.numpy as jnp
 
 @jax.jit
 def boha1(xx):
