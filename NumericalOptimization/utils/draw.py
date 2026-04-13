@@ -4,7 +4,14 @@ from mpl_toolkits.mplot3d import Axes3D
 import jax
 import jax.numpy as jnp
 
+def draw1d(objfun, x_range, samples=200):
+    x = jnp.linspace(x_range[0], x_range[1], samples)
+    y = jax.vmap(objfun)(x)
 
+    plt.figure(1)
+    plt.plot(x, y)
+    plt.show()
+    
 def draw2d(objfun, x_range, y_range, samples_x=200, samples_y=200, stride=1):
     x = jnp.linspace(x_range[0], x_range[1], samples_x)
     y = jnp.linspace(y_range[0], y_range[1], samples_y)
@@ -16,6 +23,7 @@ def draw2d(objfun, x_range, y_range, samples_x=200, samples_y=200, stride=1):
     ax = plt.axes(projection="3d")
     ax.plot_surface(X, Y, Z, alpha=0.9, cstride=stride, rstride=stride, cmap="rainbow")
     plt.show()
+
 
 
 if __name__ == "__main__":
@@ -45,4 +53,3 @@ if __name__ == "__main__":
     # plt.show()
 
     draw2d(fun, x_range=(-5, 5), y_range=(-5, 5), samples_x=200, samples_y=200, stride=3)
-
