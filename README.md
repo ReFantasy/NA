@@ -22,7 +22,7 @@ project/
 │   │   └── qr.py
 │   └── utils.py
 │       
-├── NumericalOptimization/  数值优化源码
+├── NumericalOptimization/  最优化源码
 └── README.md
 ```
 
