@@ -12,7 +12,7 @@ def feadesdir(fun, A, b, E, xk):
     _, grad = val_and_grad_fn(xk)
 
     # 确定积极约束矩阵A1
-    t = A@xk  # jnp.dot(A, xk)
+    t = A @ xk  # jnp.dot(A, xk)
     active_mask = jnp.isclose(t, b)
     A_ub = A[active_mask, :]
     b_ub = jnp.zeros(shape=(A_ub.shape[0],))  # 右侧值为零，因为我们要满足 A1 d <= 0
@@ -39,7 +39,6 @@ def feadesdir(fun, A, b, E, xk):
 
     lp = create_lp(
         c=grad,
-        #A=sparse.BCOO.fromdense(A_eq),
         A = A_eq,
         b=b_eq,
         G= -A_ub,
