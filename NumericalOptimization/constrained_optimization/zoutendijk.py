@@ -40,15 +40,11 @@ def feadesdir(objfun, A, b, E, xk):
         b=b_eq,
         G=-A_ub,
         h=b_ub,
-        l=-1.0,  
-        u=1.0,  
+        l=-1.0,
+        u=1.0,
         use_sparse_matrix=False,
-    )  # 定义解的范围 d \in [l, u]
-    solver = r2HPDHG(
-        verbose=False,
-        eps_abs=1e-4,
-        eps_rel=1e-4,
     )
+    solver = r2HPDHG(verbose=False)
     result = solver.optimize(lp)
 
     return result.primal_solution, grad
@@ -82,7 +78,7 @@ def linesearch(objfun, A, b, xk, d):
     # 设置一维搜索目标函数
     phi = lambda lam: objfun(xk + lam * d)
 
-    final_lambda, fstar, k = linear_search.golden(phi, a=0.0, b=lambda_max, epsilon=0.00001)
+    final_lambda, _, _ = linear_search.golden(phi, a=0.0, b=lambda_max, epsilon=0.00001)
     return final_lambda
 
 
@@ -93,16 +89,16 @@ def zoutendijk(objfun, A, b, E, e, x0, max_iter=1000):
     while True:
         d, grad = feadesdir(objfun, A, b, E, xk)
 
-        if jnp.isclose(grad @ d, 0.0, atol=1e-3):
+        if jnp.isclose(grad @ d, 0.0):
             return xk, objfun(xk), k
 
         if k >= max_iter:
+            print("Maximum iterations reached without convergence.")
             return xk, objfun(xk), k
 
         lam = linesearch(objfun, A, b, xk, d)
         xk = xk + lam * d
         k += 1
-        # print(f"Iteration {k}: x = {xk}, f(x) = {objfun(xk)}, lambda = {lam}")
 
 
 if __name__ == "__main__":
@@ -112,12 +108,11 @@ if __name__ == "__main__":
         return x[0] ** 2 + x[1] ** 2 - 2 * x[0] - 4 * x[1] + 6.0
 
     A = jnp.array([[2.0, 1.0], [2.0, -1.0], [-1.0, 0.0], [0.0, -1.0]])
-    # A = sparse.BCOO.fromdense(A)
     b = jnp.array([6.0, 0.0, 0.0, 0.0])
     E = jnp.array([])  # 没有等式约束
     e = jnp.array([])  # 没有等式约束的右侧值
-    x0 = jnp.array([1.0, 4.0])
-    # x0 = jnp.array([0.4483, 4.0112])
+    # x0 = jnp.array([1.0, 4.0])
+    x0 = jnp.array([0.4483, 4.0112])
 
     # d, grad = feadesdir(objfun, A, b, E, x0)
     # print("Feasible descent direction d:", d)
