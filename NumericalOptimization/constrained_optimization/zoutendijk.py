@@ -28,9 +28,9 @@ def feadesdir(fun, A, b, E, xk):
         b_eq = jnp.zeros(1)
 
     # 调用 MPAX 求解线性规划
-    # min c^T x
-    # subject to Ax = b
-    # .          Gx >= h
+    # min  c^T x
+    # s.t. Ax =  b
+    #      Gx >= h
     lp = create_lp(
         c=grad,
         A=A_eq,
@@ -40,11 +40,10 @@ def feadesdir(fun, A, b, E, xk):
         l=-jnp.ones_like(xk),
         u=jnp.ones_like(xk),
         use_sparse_matrix=False,
-    )  # 定义界限 d \in [l, u]
+    )  # 定义解的范围 d \in [l, u]
     solver = r2HPDHG(verbose=False)
     result = solver.optimize(lp)
 
-    # print("Optimal solution d:", result.primal_solution)
     return result.primal_solution
 
 
