@@ -71,9 +71,6 @@ def linesearch(objfun, A, b, xk, d):
         p_pos = p[mask_p_pos]
 
         lambda_max = jnp.min(q_pos / p_pos)
-        # 如果 lambda_max 出现异常值（例如没提取到任何项），提供一个回退
-        if jnp.isnan(lambda_max) or jnp.isinf(lambda_max):
-            lambda_max = 100.0
 
     # 设置一维搜索目标函数
     phi = lambda lam: objfun(xk + lam * d)
