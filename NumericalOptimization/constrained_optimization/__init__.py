@@ -1,1 +1,1 @@
-from .zoutendijk import *
+from .zoutendijk import zoutendijk
