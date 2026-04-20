@@ -1,8 +1,7 @@
 import jax
 import jax.numpy as jnp
-from mpax import create_lp, r2HPDHG
 from NumericalOptimization.utils import linear_search
-
+from NumericalOptimization.utils import linprog
 
 def feadesdir(objfun, A, b, E, xk, gradfun=None, atol=1e-8):
     """
@@ -12,42 +11,60 @@ def feadesdir(objfun, A, b, E, xk, gradfun=None, atol=1e-8):
         gradfun = jax.grad(objfun)
     grad_val = gradfun(xk)
 
-    # 确定积极约束矩阵A1
+    # # 确定积极约束矩阵A1
+    # t = A @ xk
+    # active_mask = jnp.isclose(t, b, atol=atol)
+    # A_ub = A[active_mask, :]
+    # A_eq = E
+
+    # if A_ub.size == 0 and A_eq.size == 0:
+    #     d = -jnp.sign(grad_val)
+    #     return d, grad_val
+
+    # if A_ub.size == 0:
+    #     A_ub = jnp.zeros(shape=(1, A.shape[1]))  # 没有不等式约束时，使用零矩阵
+    # if A_eq.size == 0:
+    #     A_eq = jnp.zeros(shape=(1, A.shape[1]))  # 没有等式约束时，使用零矩阵
+
+    # b_ub = jnp.zeros(shape=(A_ub.shape[0],))
+    # b_eq = jnp.zeros(shape=(A_eq.shape[0],))
+
+    # # 调用 MPAX 求解线性规划
+    # # min  c^T x
+    # # s.t. Ax =  b
+    # #      Gx >= h
+    # lp = create_lp(
+    #     c=grad_val,
+    #     A=A_eq,
+    #     b=b_eq,
+    #     G=-A_ub,
+    #     h=b_ub,
+    #     l=-1.0,
+    #     u=1.0,
+    #     use_sparse_matrix=False,
+    # )
+    # solver = r2HPDHG(verbose=False)
+    # result = solver.optimize(lp)
+
+    # return result.primal_solution, grad_val
+
+   
     t = A @ xk
     active_mask = jnp.isclose(t, b, atol=atol)
-    A_ub = A[active_mask, :]
-    A_eq = E
-
-    if A_ub.size == 0 and A_eq.size == 0:
-        d = -jnp.sign(grad_val)
-        return d, grad_val
-
-    if A_ub.size == 0:
-        A_ub = jnp.zeros(shape=(1, A.shape[1]))  # 没有不等式约束时，使用零矩阵
-    if A_eq.size == 0:
-        A_eq = jnp.zeros(shape=(1, A.shape[1]))  # 没有等式约束时，使用零矩阵
-
-    b_ub = jnp.zeros(shape=(A_ub.shape[0],))
-    b_eq = jnp.zeros(shape=(A_eq.shape[0],))
-
-    # 调用 MPAX 求解线性规划
-    # min  c^T x
-    # s.t. Ax =  b
-    #      Gx >= h
-    lp = create_lp(
-        c=grad_val,
-        A=A_eq,
-        b=b_eq,
-        G=-A_ub,
-        h=b_ub,
-        l=-1.0,
-        u=1.0,
-        use_sparse_matrix=False,
-    )
-    solver = r2HPDHG(verbose=False)
-    result = solver.optimize(lp)
-
-    return result.primal_solution, grad_val
+    A1 = A[active_mask, :]
+    if A1.size == 0:
+        b = None
+    else:
+        b = jnp.zeros(A1.shape[0])
+    
+    if E.size == 0:
+        beq = None
+    else:
+        beq = jnp.zeros(E.shape[0])
+    
+    d, _ = linprog(f = grad_val, A=A1, b=b, Aeq=E, beq=beq, lb=-1.0 * jnp.ones_like(grad_val), ub=1.0 * jnp.ones_like(grad_val))
+    return d, grad_val
+    
 
 
 def linesearch(objfun, A, b, xk, d, atol=1e-8):
@@ -114,8 +131,8 @@ if __name__ == "__main__":
     E = jnp.array([])  # 没有等式约束
     e = jnp.array([])  # 没有等式约束的右侧值
 
-    x0 = jnp.array([1.0, 4.0])
-    #x0 = jnp.array([0.0, 4.0])
+    #x0 = jnp.array([1.0, 4.0])
+    x0 = jnp.array([0.0, 4.0])
 
     xstar, fstar, iterations = zoutendijk(objfun, A, b, E, x0, gradfun=None)  # gradfun=None: use jax auto diff
     print(f"Total iterations             : {iterations}")
