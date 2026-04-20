@@ -4,7 +4,7 @@ from mpax import create_lp, r2HPDHG
 from NumericalOptimization.utils import linear_search
 
 
-def feadesdir(objfun, A, b, E, xk, gradfun=None):
+def feadesdir(objfun, A, b, E, xk, gradfun=None, atol=1e-8):
     """
     使用 JAX 和 MPAX 确定可行下降方向
     """
@@ -14,7 +14,7 @@ def feadesdir(objfun, A, b, E, xk, gradfun=None):
 
     # 确定积极约束矩阵A1
     t = A @ xk
-    active_mask = jnp.isclose(t, b)
+    active_mask = jnp.isclose(t, b, atol=atol)
     A_ub = A[active_mask, :]
     A_eq = E
 
@@ -50,10 +50,10 @@ def feadesdir(objfun, A, b, E, xk, gradfun=None):
     return result.primal_solution, grad_val
 
 
-def linesearch(objfun, A, b, xk, d):
+def linesearch(objfun, A, b, xk, d, atol=1e-8):
     # 确定积极约束矩阵A1
     t = A @ xk
-    active_mask = jnp.isclose(t, b)
+    active_mask = jnp.isclose(t, b, atol=atol)
     # active_mask 取反，得到非积极约束矩阵A2
     inactive_mask = ~active_mask
     A2 = A[inactive_mask, :]
@@ -75,27 +75,28 @@ def linesearch(objfun, A, b, xk, d):
     # 设置一维搜索目标函数
     phi = lambda lam: objfun(xk + lam * d)
 
-    final_lambda, _, _ = linear_search.golden(phi, a=0.0, b=lambda_max, epsilon=1e-8)
+    final_lambda, _, _ = linear_search.golden(phi, a=0.0, b=lambda_max, epsilon=atol)
     return final_lambda
 
 
-def zoutendijk(objfun, A, b, E, x0, gradfun=None, max_iter=1000):
+def zoutendijk(objfun, A, b, E, x0, gradfun=None, max_iter=1000, atol: float = 1e-4):
     k = 0
     xk = x0
 
     while True:
-        d, grad = feadesdir(objfun, A, b, E, xk, gradfun=gradfun)
+        d, grad = feadesdir(objfun, A, b, E, xk, gradfun=gradfun, atol=atol)
 
-        if jnp.isclose(grad @ d, 0.0):
+        if jnp.isclose(grad @ d, 0.0, atol=atol):
             return xk, objfun(xk), k
 
         if k >= max_iter:
             print("Maximum iterations reached without convergence.")
             return xk, objfun(xk), k
 
-        lam = linesearch(objfun, A, b, xk, d)
+        lam = linesearch(objfun, A, b, xk, d, atol=atol**2)
         xk = xk + lam * d
         k += 1
+        # print(f"Iteration {k}: x = {xk}, f(x) = {objfun(xk)}, grad @ d = {grad @ d}")
 
 
 if __name__ == "__main__":
@@ -108,13 +109,13 @@ if __name__ == "__main__":
     def gradfun(x):
         return jnp.array([2 * x[0] - 2, 2 * x[1] - 4])
 
-    A = jnp.array([[2.0, 1.0], [2.0, -1.0], [-1.0, 0.0], [0.0, -1.0]])
+    A = jnp.array([[2.0, 1.0], [3.0, -1.0], [-1.0, 0.0], [0.0, -1.0]])
     b = jnp.array([6.0, 0.0, 0.0, 0.0])
     E = jnp.array([])  # 没有等式约束
     e = jnp.array([])  # 没有等式约束的右侧值
 
-    # x0 = jnp.array([1.0, 4.0])
-    x0 = jnp.array([0.4483, 4.0112])
+    x0 = jnp.array([1.0, 4.0])
+    #x0 = jnp.array([0.0, 4.0])
 
     xstar, fstar, iterations = zoutendijk(objfun, A, b, E, x0, gradfun=None)  # gradfun=None: use jax auto diff
     print(f"Total iterations             : {iterations}")
