@@ -4,7 +4,7 @@ from NumericalOptimization.utils import linear_search
 from NumericalOptimization.utils import linprog
 
 
-def feadesdir(objfun, A, b, E, xk, gradfun=None, atol=1e-8):
+def feadesdir_lin(objfun, A, b, E, xk, gradfun=None, atol=1e-8):
     """
     使用 JAX 和 MPAX 确定可行下降方向
     """
@@ -31,7 +31,7 @@ def feadesdir(objfun, A, b, E, xk, gradfun=None, atol=1e-8):
     return d, grad_val
 
 
-def linesearch(objfun, A, b, xk, d, atol=1e-8):
+def linesearch_lin(objfun, A, b, xk, d, atol=1e-8):
     # 确定积极约束矩阵A1
     t = A @ xk
     active_mask = jnp.isclose(t, b, atol=atol)
@@ -60,12 +60,12 @@ def linesearch(objfun, A, b, xk, d, atol=1e-8):
     return final_lambda
 
 
-def zoutendijk(objfun, A, b, E, x0, gradfun=None, max_iter=1000, atol: float = 1e-4):
+def zoutendijk_lin(objfun, A, b, E, x0, gradfun=None, max_iter=1000, atol: float = 1e-4):
     k = 0
     xk = x0
 
     while True:
-        d, grad = feadesdir(objfun, A, b, E, xk, gradfun=gradfun, atol=atol)
+        d, grad = feadesdir_lin(objfun, A, b, E, xk, gradfun=gradfun, atol=atol)
 
         if jnp.isclose(grad @ d, 0.0, atol=atol):
             return xk, objfun(xk), k
@@ -74,7 +74,7 @@ def zoutendijk(objfun, A, b, E, x0, gradfun=None, max_iter=1000, atol: float = 1
             print("Maximum iterations reached without convergence.")
             return xk, objfun(xk), k
 
-        lam = linesearch(objfun, A, b, xk, d, atol=atol**2)
+        lam = linesearch_lin(objfun, A, b, xk, d, atol=atol**2)
         xk = xk + lam * d
         k += 1
         # print(f"Iteration {k}: x = {xk}, f(x) = {objfun(xk)}, grad @ d = {grad @ d}")
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     # x0 = jnp.array([1.0, 4.0])
     x0 = jnp.array([0.0, 4.0])
 
-    xstar, fstar, iterations = zoutendijk(objfun, A, b, E, x0, gradfun=None)  # gradfun=None: use jax auto diff
+    xstar, fstar, iterations = zoutendijk_lin(objfun, A, b, E, x0, gradfun=None)  # gradfun=None: use jax auto diff
     print(f"Total iterations             : {iterations}")
     print(f"Optimal solution x           : {xstar}")
     print(f"Optimal objective value f(x) : {fstar}")

@@ -5,6 +5,26 @@ import NumericalAnalysis as na
 from NumericalOptimization.linear_search import LineSearchParams
 
 
+# 定义约束函数类
+class ConstraintFunctionSet:
+    def __init__(self, func_list, grad_list=None):
+        self.func_list = func_list  # 约束函数列表
+
+        self.grad_list = grad_list if grad_list is not None else []  # 约束函数的梯度列表，如果未提供则初始化为空列表
+        if len(self.grad_list) == 0:  # 如果没有提供梯度列表，则使用 JAX 自动求导计算梯度
+            for i in range(len(func_list)):
+                self.grad_list.append(jax.grad(func_list[i]))
+
+    def evaluate(self, x):
+        return jnp.array([func(x) for func in self.func_list])
+
+    def gradient(self, x):
+        return jnp.array([grad(x) for grad in self.grad_list])
+
+    def __call__(self, x):
+        return self.evaluate(x), self.gradient(x)
+
+
 def chase(phi: callable, x_init: float, h: float):
     """
     使用进退法（Bounding Phase Method）寻找一元函数的极小值包含区间。
