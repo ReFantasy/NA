@@ -2,6 +2,7 @@ import jax
 import jax.numpy as jnp
 from NumericalOptimization.utils import linear_search
 from NumericalOptimization.utils import linprog
+from loguru import logger
 
 
 def feadesdir_lin(objfun, A, b, E, xk, gradfun=None, atol=1e-8):
@@ -60,7 +61,9 @@ def linesearch_lin(objfun, A, b, xk, d, atol=1e-8):
     return final_lambda
 
 
-def zoutendijk_lin(objfun, A, b, E, x0, gradfun=None, max_iter=1000, atol: float = 1e-4):
+def zoutendijk_lin(objfun, A, b, E, x0, gradfun=None, max_iter=1000, atol: float = 1e-4, verbose=True):
+    jnp.set_printoptions(formatter={"float": "{: .4e}".format})
+
     k = 0
     xk = x0
 
@@ -68,16 +71,25 @@ def zoutendijk_lin(objfun, A, b, E, x0, gradfun=None, max_iter=1000, atol: float
         d, grad = feadesdir_lin(objfun, A, b, E, xk, gradfun=gradfun, atol=atol)
 
         if jnp.isclose(grad @ d, 0.0, atol=atol):
+            if verbose:
+                logger.info(
+                    f"Iteration {k:4d}: x = {xk}, f(x) = {objfun(xk):.4e}, grad @ d = {grad @ d:.4e}, lambda = {lam:.4e}"
+                )
             return xk, objfun(xk), k
 
         if k >= max_iter:
-            print("Maximum iterations reached without convergence.")
+            logger.warning("Maximum iterations reached without convergence.")
             return xk, objfun(xk), k
 
         lam = linesearch_lin(objfun, A, b, xk, d, atol=atol**2)
+
+        if verbose:
+            logger.info(
+                f"Iteration {k:4d}: x = {xk}, f(x) = {objfun(xk):.4e}, grad @ d = {grad @ d:.4e}, lambda = {lam:.4e}"
+            )
+
         xk = xk + lam * d
         k += 1
-        # print(f"Iteration {k}: x = {xk}, f(x) = {objfun(xk)}, grad @ d = {grad @ d}")
 
 
 if __name__ == "__main__":
@@ -98,7 +110,9 @@ if __name__ == "__main__":
     # x0 = jnp.array([1.0, 4.0])
     x0 = jnp.array([0.0, 4.0])
 
-    xstar, fstar, iterations = zoutendijk_lin(objfun, A, b, E, x0, gradfun=None)  # gradfun=None: use jax auto diff
+    xstar, fstar, iterations = zoutendijk_lin(
+        objfun, A, b, E, x0, gradfun=None, verbose=True
+    )  # gradfun=None: use jax auto diff
     print(f"Total iterations             : {iterations}")
     print(f"Optimal solution x           : {xstar}")
     print(f"Optimal objective value f(x) : {fstar}")

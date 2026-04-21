@@ -3,6 +3,7 @@ import jax.numpy as jnp
 from NumericalOptimization.utils import linprog
 from NumericalOptimization.utils import linear_search
 from NumericalOptimization.utils.common import ConstraintFunctionSet
+from loguru import logger
 
 
 def feadesdir_nonlin(obj: callable, cons: ConstraintFunctionSet, xk: jnp.ndarray, atol=1e-8):
@@ -57,22 +58,29 @@ def linesearch_nonlin(objfun, cons: ConstraintFunctionSet, xk: jnp.ndarray, d: j
     return final_lambda
 
 
-def zoutendijk_nonlin(objfun, cons: ConstraintFunctionSet, x0: jnp.ndarray, max_iter=1000, atol=1e-4):
+def zoutendijk_nonlin(objfun, cons: ConstraintFunctionSet, x0: jnp.ndarray, max_iter=1000, atol=1e-4, verbose=True):
+    jnp.set_printoptions(formatter={"float": "{: .4e}".format})
+
     k = 0
     xk = x0
     while True:
         d, z = feadesdir_nonlin(objfun, cons, xk, atol=atol)
 
         if jnp.isclose(z, 0.0, atol=atol):
+            if verbose:
+                logger.info(f"Iteration {k:4d}: x = {xk}, f(x) = {objfun(xk):.4e}, d = {d}, lambda = {lambda_k:.4e}")
             return xk, objfun(xk), k
         if k >= max_iter:
-            print("Maximum iterations reached without convergence.")
+            logger.warning("Maximum iterations reached without convergence.")
             return xk, objfun(xk), k
 
         lambda_k = linesearch_nonlin(objfun, cons, xk, d, atol=atol)
+
+        if verbose:
+            logger.info(f"Iteration {k:4d}: x = {xk}, f(x) = {objfun(xk):.4e}, d = {d}, lambda = {lambda_k:.4e}")
+
         xk = xk + lambda_k * d
         k += 1
-        # print(f"Iteration {k}: x = {xk}, f(x) = {objfun(xk)}")
 
 
 if __name__ == "__main__":
@@ -112,6 +120,6 @@ if __name__ == "__main__":
     # print(lambda_val)
 
     xstar, fstar, iterations = zoutendijk_nonlin(objfun, constraints, x0=x)
-    print(f"Total iterations             : {iterations}")
-    print(f"Optimal solution x           : {xstar}")
-    print(f"Optimal objective value f(x) : {fstar}")
+    logger.info(f"Total iterations             : {iterations}")
+    logger.info(f"Optimal solution x           : {xstar}")
+    logger.info(f"Optimal objective value f(x) : {fstar}")
