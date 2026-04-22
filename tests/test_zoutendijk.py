@@ -1,4 +1,3 @@
-import time
 import jax
 import jax.numpy as jnp
 from pytest import approx
@@ -35,7 +34,7 @@ def test_zoutendijk_lin():
     # x0 = jnp.array([1.0, 4.0])
     x0 = jnp.array([0.0, 4.0])
 
-    xstar, fstar, iterations = zoutendijk_lin(
+    xstar, fstar, _ = zoutendijk_lin(
         objfun, A, b, E, x0, gradfun=gradfun, verbose=True
     )  # gradfun=None: use jax auto diff
     assert np.array(xstar) == approx([1.0, 2.0], abs=0.001)
@@ -73,6 +72,6 @@ def test_zoutendijk_nonlin():
 
     constraints = ConstraintFunctionSet(func_list=[constraint1, constraint2, constraint3])
     x = jnp.array([1.0, 0.0])
-    xstar, fstar, iterations = zoutendijk_nonlin(objfun, constraints, x0=x)
+    xstar, fstar, _ = zoutendijk_nonlin(objfun, constraints, x0=x)
     assert np.array(xstar) == approx([0.0, 2.0], abs=0.001)
     assert fstar == approx(5.0, abs=0.001)
