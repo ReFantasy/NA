@@ -107,17 +107,6 @@ if __name__ == "__main__":
 
     constraints = ConstraintFunctionSet(func_list=[constraint1, constraint2, constraint3])
     x = jnp.array([1.0, 0.0])
-    # print("Constraint values at x:\n", np.array(constraints.evaluate(x)))
-    # print("Constraint gradients at x:\n", np.array(constraints.gradient(x)))
-    # v, g = constraints(x)
-    # print("Constraint values at x:\n", np.array(v))
-    # print("Constraint gradients at x:\n", np.array(g))
-
-    # d, z = feadesdir(objfun, constraints, x)
-    # print(d)
-    # print(z)
-    # lambda_val = linesearch(objfun, constraints, x, atol=1e-8)
-    # print(lambda_val)
 
     xstar, fstar, iterations = zoutendijk_nonlin(objfun, constraints, x0=x)
     logger.info(f"Total iterations             : {iterations}")
