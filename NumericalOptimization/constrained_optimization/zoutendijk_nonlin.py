@@ -1,8 +1,6 @@
 import jax
 import jax.numpy as jnp
-from NumericalOptimization.utils import linprog
-from NumericalOptimization.utils import linear_search
-from NumericalOptimization.utils.common import ConstraintFunctionSet
+from NumericalOptimization.utils import linprog, linear_search, ConstraintFunctionSet
 from loguru import logger
 
 

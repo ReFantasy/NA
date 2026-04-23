@@ -1,7 +1,6 @@
 import jax
 import jax.numpy as jnp
-from NumericalOptimization.utils import linear_search
-from NumericalOptimization.utils import linprog
+from NumericalOptimization.utils import linprog, linear_search
 from loguru import logger
 
 
