@@ -25,6 +25,8 @@ def linprog(
     ```
 
     `f`, `x`, `b`, `beq`, `lb`, and `ub` are vectors, and `A` and `Aeq` are matrices.
+
+    returns the optimal solution `x` and the optimal value `f^T x`.
     """
     n = len(f)
 
@@ -46,9 +48,9 @@ def linprog(
         b = jnp.zeros(A.shape[0])
     if beq is None or beq.size == 0:
         beq = jnp.zeros(Aeq.shape[0])
-    if lb is None or lb.size == 0:
+    if lb is None:
         lb = -1.0 * jnp.ones(n)
-    if ub is None or ub.size == 0:
+    if ub is None:
         ub = 1.0 * jnp.ones(n)
 
     # 调用 MPAX 求解线性规划
