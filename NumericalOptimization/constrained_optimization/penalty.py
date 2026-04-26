@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
     eq_cons = []
     ineq_cons = [g1, g2]
-    x0 = jnp.array([3.0, 4.0])
+    x0 = jnp.array([3.0, -4.0])
     ext_pen = ExtPenalty(objfun, ineq_cons, eq_cons, x0)
     xstar, fstar, k = ext_pen.optimize()
     print(xstar, fstar, k)
