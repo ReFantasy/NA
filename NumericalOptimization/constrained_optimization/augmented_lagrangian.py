@@ -1,5 +1,3 @@
-from turtle import pen
-
 import jax
 import jax.numpy as jnp
 from loguru import logger
