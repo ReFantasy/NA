@@ -53,9 +53,14 @@ def pcg(M: sparse.CSR, A: sparse.BCOO, b: jnp.array, tol=1e-6, x0: jnp.array = N
     else:
         x = x0
 
+    L = jax.scipy.linalg.cholesky(M.todense(), lower=True)
+
     r = b - A @ x
+
     # z = jnp.linalg.solve(M, r)
-    z = sparse.linalg.spsolve(data=M.data, indices=M.indices, indptr=M.indptr, b=r)
+    # z = sparse.linalg.spsolve(data=M.data, indices=M.indices, indptr=M.indptr, b=r)
+    a = jnp.linalg.solve(L, r)
+    z = jnp.linalg.solve(L.T, a)
 
     p = z
     k = 0
@@ -67,8 +72,11 @@ def pcg(M: sparse.CSR, A: sparse.BCOO, b: jnp.array, tol=1e-6, x0: jnp.array = N
         if jnp.linalg.norm(r, ord=jnp.inf) < tol:
             break
         z_old = z
+
         # z = jnp.linalg.solve(M, r)
-        z = sparse.linalg.spsolve(data=M.data, indices=M.indices, indptr=M.indptr, b=r)
+        # z = sparse.linalg.spsolve(data=M.data, indices=M.indices, indptr=M.indptr, b=r)
+        a = jnp.linalg.solve(L, r)
+        z = jnp.linalg.solve(L.T, a)
 
         # Fletcher–Reeves formula: beta_k = (r.T @ z) / (r_old.T @ z_old)
         beta_k = (r.T @ (z - z_old)) / (r_old.T @ z_old)  # Polak–Ribière formula
