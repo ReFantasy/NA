@@ -189,7 +189,7 @@ if __name__ == "__main__":
     x, r, k = cg(A_sp, b, tol=1e-4)
     t2 = time.time()
     print(f"CG method took {t2 - t1:.4f} seconds.")
-
+    print(f"x: {x[:10]}...")  # 打印前10个元素以验证结果
     print(f"residual: {r.T @ r}, number of iterations: {k}")
 
     print("-----------------------------------------------")
@@ -208,5 +208,5 @@ if __name__ == "__main__":
     x, r, k = pcg(M, A_sp, b, tol=1e-4)
     t2 = time.time()
     print(f"PCG method took {t2 - t1:.4f} seconds.")
-
+    print(f"x: {x[:10]}...")  # 打印前10个元素以验证结果
     print(f"residual: {r.T @ r}, number of iterations: {k}")
