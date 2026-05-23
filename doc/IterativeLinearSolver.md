@@ -30,6 +30,6 @@ let $e^k = M^{-1}(b-Ax^k)$, we have the algorithm:
 ```plain
 for i = 0:
     Compute r = b-Ax
-    Solver the error equation Me=r ( or solve Ae = r approximately)
+    Solver the error equation Me=r (solve Ae = r approximately)
     Update x = x + e
 ```
