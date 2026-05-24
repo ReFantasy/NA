@@ -71,12 +71,13 @@ def pcg(M: sparse.CSR, A: sparse.BCOO, b: jnp.array, tol=1e-6, x0: jnp.array = N
     while True:
         Ap = A @ p
         rz_old = r.T @ z
-        if jnp.abs(rz_old) < tol:
-            k += 1
-            break
         alpha_k = rz_old / (p.T @ Ap)
         x = x + alpha_k * p
         r = r - alpha_k * Ap
+        
+        if jnp.linalg.norm(r, ord=jnp.inf) < tol:
+            k += 1
+            break
         
         # z = jnp.linalg.solve(M, r)
         # z = sparse.linalg.spsolve(data=M.data, indices=M.indices, indptr=M.indptr, b=r)
