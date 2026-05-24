@@ -69,22 +69,22 @@ def pcg(M: sparse.CSR, A: sparse.BCOO, b: jnp.array, tol=1e-6, x0: jnp.array = N
     p = z
     k = 0
     while True:
-        alpha_k = (r.T @ z) / (p.T @ A @ p)
-        x = x + alpha_k * p
-        r_old = r
-        r = r - alpha_k * A @ p
-        if jnp.linalg.norm(r, ord=jnp.inf) < tol:
+        Ap = A @ p
+        rz_old = r.T @ z
+        if jnp.abs(rz_old) < tol:
             k += 1
             break
-        z_old = z
-
+        alpha_k = rz_old / (p.T @ Ap)
+        x = x + alpha_k * p
+        r = r - alpha_k * Ap
+        
         # z = jnp.linalg.solve(M, r)
         # z = sparse.linalg.spsolve(data=M.data, indices=M.indices, indptr=M.indptr, b=r)
         a = jax.scipy.linalg.solve_triangular(L, r, lower=True)
         z = jax.scipy.linalg.solve_triangular(L.T, a, lower=False)
 
-        beta_k = (r.T @ z) / (r_old.T @ z_old)  # Fletcher–Reeves formula:
-        # beta_k = (r.T @ (z - z_old)) / (r_old.T @ z_old)  # Polak–Ribière formula
+        beta_k = (r.T @ z) / rz_old  # Fletcher–Reeves formula:
+        # beta_k = (r.T @ (z - z_old)) / rz_old  # Polak–Ribière formula
 
         p = z + beta_k * p
         k += 1
