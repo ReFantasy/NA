@@ -33,20 +33,27 @@ def cg(A: sparse.BCOO, b: jnp.array, tol=1e-6, x0: jnp.array = None):
 
     p = r
     k = 0
+
+    rTr_old = r.T @ r
     while True:
         Ap = A @ p
-        rdotr_old = r.T @ r
 
-        alpha_k = rdotr_old / (p.T @ Ap)
-        x = x + alpha_k * p
-        r = r - alpha_k * Ap
+        alpha = rTr_old / (p.T @ Ap)
+        x = x + alpha * p
+        r = r - alpha * Ap
+
         # 判断是否终止
         if jnp.linalg.norm(r, ord=jnp.inf) < tol:
             k += 1
             break
-        beta_k = (r.T @ r) / rdotr_old
-        p = r + beta_k * p
+
+        rTr = r.T @ r
+        beta = rTr / rTr_old
+        p = r + beta * p
+
+        rTr_old = rTr
         k += 1
+
     return x, b - A @ x, k
 
 
@@ -67,13 +74,15 @@ def pcg(M: sparse.CSR, A: sparse.BCOO, b: jnp.array, tol=1e-6, x0: jnp.array = N
 
     p = z
     k = 0
+
+    rTz_old = r.T @ z
     while True:
         Ap = A @ p
-        rz_old = r.T @ z
+        alpha = rTz_old / (p.T @ Ap)
 
-        alpha_k = rz_old / (p.T @ Ap)
-        x = x + alpha_k * p
-        r = r - alpha_k * Ap
+        x = x + alpha * p
+        r = r - alpha * Ap
+
         if jnp.linalg.norm(r, ord=jnp.inf) < tol:
             k += 1
             break
@@ -83,11 +92,15 @@ def pcg(M: sparse.CSR, A: sparse.BCOO, b: jnp.array, tol=1e-6, x0: jnp.array = N
         a = jax.scipy.linalg.solve_triangular(L, r, lower=True)
         z = jax.scipy.linalg.solve_triangular(L.T, a, lower=False)
 
-        beta_k = (r.T @ z) / rz_old  # Fletcher–Reeves formula:
+        rTz = r.T @ z
+        beta = rTz / rTz_old  # Fletcher–Reeves formula:
         # beta_k = (r.T @ (z - z_old)) / rz_old  # Polak–Ribière formula
 
-        p = z + beta_k * p
+        p = z + beta * p
+
+        rTz_old = rTz
         k += 1
+
     return x, b - A @ x, k
 
 
