@@ -34,18 +34,17 @@ def cg(A: sparse.BCOO, b: jnp.array, tol=1e-6, x0: jnp.array = None):
     p = r
     k = 0
     while True:
-        alpha_k = (r.T @ r) / (p.T @ A @ p)
+        Ap = A @ p
+        rdotr_old = r.T @ r
+
+        alpha_k = rdotr_old / (p.T @ Ap)
         x = x + alpha_k * p
-
-        r_old = r
-        r = r - alpha_k * A @ p
-
+        r = r - alpha_k * Ap
         # 判断是否终止
         if jnp.linalg.norm(r, ord=jnp.inf) < tol:
             k += 1
             break
-
-        beta_k = (r.T @ r) / (r_old.T @ r_old)
+        beta_k = (r.T @ r) / rdotr_old
         p = r + beta_k * p
         k += 1
     return x, b - A @ x, k
@@ -71,14 +70,14 @@ def pcg(M: sparse.CSR, A: sparse.BCOO, b: jnp.array, tol=1e-6, x0: jnp.array = N
     while True:
         Ap = A @ p
         rz_old = r.T @ z
+
         alpha_k = rz_old / (p.T @ Ap)
         x = x + alpha_k * p
         r = r - alpha_k * Ap
-        
         if jnp.linalg.norm(r, ord=jnp.inf) < tol:
             k += 1
             break
-        
+
         # z = jnp.linalg.solve(M, r)
         # z = sparse.linalg.spsolve(data=M.data, indices=M.indices, indptr=M.indptr, b=r)
         a = jax.scipy.linalg.solve_triangular(L, r, lower=True)
