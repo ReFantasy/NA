@@ -9,13 +9,17 @@ The example is from the dealii documentation: https://dealii.org/current/doxygen
 import taichi as ti
 import matplotlib.pyplot as plt
 import time
+import numpy as np
 
 real = ti.f32
 ti.init(default_fp=real, arch=ti.x64, kernel_profiler=False)
 
+n_mg_levels = 4
+pre_and_post_smoothing = 4
+bottom_smoothing = 500
 # grid parameters
 N_ext = 4  # number of ghost cells for boundary conditions
-N = 128 * N_ext
+N = 32 * N_ext
 N_TOL = N + N_ext * 2
 
 N_gui = 512  # gui resolution
@@ -27,13 +31,18 @@ square_h_inv = 1.0 / (h * h)  # precompute for efficiency
 x = ti.field(dtype=real)  # solution
 p = ti.field(dtype=real)  # conjugate gradient
 Ap = ti.field(dtype=real)  # matrix-vector product
-r = ti.field(dtype=real)  # residual
+
 alpha = ti.field(dtype=real)  # step size
 beta = ti.field(dtype=real)  # step size
 sum_ = ti.field(dtype=real)  # storage for reductions
 
-ti.root.pointer(ti.ij, [N // N_ext + 2]).dense(ti.ij, N_ext).place(x, p, Ap, r)
+ti.root.pointer(ti.ij, [N // N_ext + 2]).dense(ti.ij, N_ext).place(x, p, Ap)
 ti.root.place(alpha, beta, sum_)
+
+r = [ti.field(dtype=real) for _ in range(n_mg_levels)]  # residual
+z = [ti.field(dtype=real) for _ in range(n_mg_levels)]  # M^-1 r
+for lvl in range(n_mg_levels):
+    ti.root.pointer(ti.ij, [N // (N_ext * 2**lvl) + 2]).dense(ti.ij, N_ext).place(r[lvl], z[lvl])
 
 
 @ti.kernel
@@ -58,22 +67,82 @@ def update_x():
 @ti.kernel
 def update_r():
     for I in ti.grouped(p):
-        r[I] -= alpha[None] * Ap[I]
+        r[0][I] -= alpha[None] * Ap[I]
 
 
 @ti.kernel
 def update_p():
     for I in ti.grouped(p):
-        p[I] = r[I] + beta[None] * p[I]
+        p[I] = z[0][I] + beta[None] * p[I]
 
 
 @ti.kernel
 def init():
     for i, j in ti.ndrange((N_ext, N_ext + N), (N_ext, N_ext + N)):
+        xl = (i - N_ext) * h - 1.0
+        yl = (j - N_ext) * h - 1.0
+        # x[i, j] = ti.sin(2.0 * np.pi * xl) * ti.sin(2.0 * np.pi * yl)
+
         x[i, j] = 0.0
         # r = b - Ax, where x = 0; therefore r = b
-        r[i, j] = 1.0  # f(x) = 1.0 for Poisson equation with zero Dirichlet boundary conditions
-        p[i, j] = r[i, j]  # initial search direction p0 = r0
+        r[0][i, j] = 1.0  # f(x) = 1.0 for Poisson equation with zero Dirichlet boundary conditions
+        z[0][i, j] = 0.0  # initial preconditioned residual z0 = r0
+        p[i, j] = 0.0  # initial search direction p0 = r0
+        Ap[i, j] = 0.0
+
+
+@ti.kernel
+def IdentifyM():
+    for I in ti.grouped(r[0]):
+        z[0][I] = r[0][I]  # M = I, no preconditioning
+
+
+@ti.kernel
+def smooth(l: ti.template(), phase: ti.template()):
+    # solve A z = r approximately by performing a few iterations of red-black Gauss-Seidel relaxation, where A is the 32-D Laplace operator
+    # phase = red/black Gauss-Seidel phase
+    for i, j in r[l]:
+        if (i + j) & 1 == phase:
+            z[l][i, j] = (r[l][i, j] * h * h + z[l][i + 1, j] + z[l][i - 1, j] + z[l][i, j + 1] + z[l][i, j - 1]) / 4.0
+
+
+@ti.kernel
+def restrict(l: ti.template()):
+    for i, j in r[l]:
+        res = (
+            r[l][i, j]
+            - (4.0 * z[l][i, j] - z[l][i + 1, j] - z[l][i - 1, j] - z[l][i, j + 1] - z[l][i, j - 1]) * square_h_inv
+        )
+        r[l + 1][i // 2, j // 2] += res * 0.5
+
+
+@ti.kernel
+def prolongate(l: ti.template()):
+    for I in ti.grouped(z[l]):
+        z[l][I] = z[l + 1][I // 2]
+
+
+def apply_preconditioner():
+    z[0].fill(0)
+
+    for l in range(n_mg_levels - 1):
+        for _ in range(pre_and_post_smoothing << l):
+            smooth(l, 0)
+            smooth(l, 1)
+        z[l + 1].fill(0)
+        r[l + 1].fill(0)
+        restrict(l)
+
+    # solve A z = r approximately on the coarsest level by performing a few iterations of red-black Gauss-Seidel relaxation
+    for _ in range(bottom_smoothing):
+        smooth(n_mg_levels - 1, 0)
+        smooth(n_mg_levels - 1, 1)
+
+    for l in reversed(range(n_mg_levels - 1)):
+        prolongate(l)
+        for i in range(pre_and_post_smoothing << l):
+            smooth(l, 1)
+            smooth(l, 0)
 
 
 @ti.kernel
@@ -84,16 +153,24 @@ def paint():
         pixels[i, j] = x[ii + N_ext, jj + N_ext]  # * 2.0
 
 
-gui = ti.GUI("Conjugate Gradient (CG) for 2D Poisson equation", res=(N_gui, N_gui))
+gui = ti.GUI("Multigrid Preconditioned Conjugate Gradient (MGPCG)", res=(N_gui, N_gui))
 
 
 def main():
 
     init()
 
-    reduce(r, r)
+    sum_[None] = 0.0
+    reduce(r[0], r[0])
     rTr_initial = sum_[None]
-    rTr_old = sum_[None]
+
+    apply_preconditioner()
+
+    update_p()
+
+    sum_[None] = 0.0
+    reduce(r[0], z[0])
+    rTz_old = sum_[None]
 
     k = 0
     while gui.running:
@@ -102,7 +179,7 @@ def main():
         sum_[None] = 0.0
         reduce(p, Ap)
         pAp = sum_[None]
-        alpha[None] = rTr_old / pAp
+        alpha[None] = rTz_old / pAp
 
         # x = x + alpha p
         update_x()
@@ -111,26 +188,32 @@ def main():
         update_r()
 
         sum_[None] = 0.0
-        reduce(r, r)
+        reduce(r[0], r[0])
         rTr = sum_[None]
-
-        #print(f"iter {k}: residual: {rTr:.6e}")
+        print(f"iter {k}: residual: {rTr:.6e}")
         if rTr < 2e-8:  # rTr_initial * 1e-12:
             print(f"Converged! Final residual: {rTr:.6e}, initial residual: {rTr_initial:.6e}")
             break
 
-        beta[None] = rTr / rTr_old
+        # z = M^{-1} r, where M is the multigrid preconditioner
+        # IdentifyM()
+        apply_preconditioner()
 
-        # p = r + beta p
+        sum_[None] = 0.0
+        reduce(r[0], z[0])
+        rTz = sum_[None]
+
+        beta[None] = rTz / rTz_old
+
+        # p = z + beta p
         update_p()
 
-        rTr_old = rTr
+        rTz_old = rTz
         k += 1
 
         paint()
         gui.set_image(pixels)
         gui.show()
-    pass
 
 
 if __name__ == "__main__":
@@ -141,8 +224,8 @@ if __name__ == "__main__":
 
     pixels_np = pixels.to_numpy()
 
-    plt.title("Conjugate Gradient (CG) for 2D Poisson equation")
-    plt.gcf().canvas.manager.set_window_title("Conjugate Gradient (CG) for 2D Poisson equation")
+    plt.title("Multigrid Preconditioned Conjugate Gradient (MGPCG)")
+    plt.gcf().canvas.manager.set_window_title("Multigrid Preconditioned Conjugate Gradient (MGPCG)")
     plt.rcParams["font.family"] = "Times New Roman"
 
     # 将原始 2D 数组直接传给 imshow，并指定 colormap
@@ -156,5 +239,5 @@ if __name__ == "__main__":
     plt.tight_layout()
 
     # 保存为高清图片，dpi 即为 PPI（每英寸像素点数），通常 300 或 600 用于高清/出版
-    # plt.savefig("cg_poisson_2d.png", dpi=600)
+    # plt.savefig("mgpcg_poisson_2d.png", dpi=600)
     plt.show()
