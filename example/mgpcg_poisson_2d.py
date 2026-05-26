@@ -9,17 +9,17 @@ The example is from the dealii documentation: https://dealii.org/current/doxygen
 import taichi as ti
 import matplotlib.pyplot as plt
 import time
-import numpy as np
 
 real = ti.f32
 ti.init(default_fp=real, arch=ti.x64, kernel_profiler=False)
+
 
 n_mg_levels = 4
 pre_and_post_smoothing = 4
 bottom_smoothing = 500
 # grid parameters
 N_ext = 4  # number of ghost cells for boundary conditions
-N = 32 * N_ext
+N = 128 * N_ext
 N_TOL = N + N_ext * 2
 
 N_gui = 512  # gui resolution
@@ -190,7 +190,7 @@ def main():
         sum_[None] = 0.0
         reduce(r[0], r[0])
         rTr = sum_[None]
-        print(f"iter {k}: residual: {rTr:.6e}")
+        # print(f"iter {k}: residual: {rTr:.6e}")
         if rTr < 2e-8:  # rTr_initial * 1e-12:
             print(f"Converged! Final residual: {rTr:.6e}, initial residual: {rTr_initial:.6e}")
             break
