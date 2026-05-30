@@ -18,7 +18,7 @@ n_mg_levels = 4
 pre_and_post_smoothing = 2
 bottom_smoothing = 500
 
-N = 128*4
+N = 128 * 4
 N_gui = 512  # gui resolution
 
 pixels = ti.field(dtype=real, shape=(N_gui, N_gui))  # image buffer
@@ -157,7 +157,7 @@ def paint():
     for i, j in pixels:
         ii = int(i * N / N_gui) + N_ext
         jj = int(j * N / N_gui) + N_ext
-        pixels[i, j] = x[ii, jj] 
+        pixels[i, j] = x[ii, jj]
 
 
 gui = ti.GUI("Multigrid Preconditioned Conjugate Gradient (MGPCG)", res=(N_gui, N_gui))
@@ -198,7 +198,7 @@ def main():
         sum_[None] = 0.0
         reduce(r[0], r[0])
         rTr = sum_[None]
-        #print(f"iter {k}: residual: {rTr:.6e}")
+        # print(f"iter {k}: residual: {rTr:.6e}")
         if rTr < 2e-8:  # rTr_initial * 1e-12:
             print(f"Converged! Final residual: {rTr:.6e}, initial residual: {rTr_initial:.6e}")
             break
@@ -222,15 +222,14 @@ def main():
         paint()
         gui.set_image(pixels)
         gui.show()
-        
+
     t2 = time.time()
     print(f"Total time: {t2 - t1:.4f} seconds")
 
 
 if __name__ == "__main__":
-    
+
     main()
-    
 
     pixels_np = pixels.to_numpy()
 
