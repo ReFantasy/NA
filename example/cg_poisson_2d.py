@@ -96,6 +96,7 @@ def main():
     rTr_old = sum_[None]
 
     k = 0
+    t1 = time.time()
     while gui.running:
         compute_Ap()
 
@@ -130,14 +131,15 @@ def main():
         paint()
         gui.set_image(pixels)
         gui.show()
-    pass
+        
+    t2 = time.time()
+    print(f"Total time: {t2 - t1:.4f} seconds")
 
 
 if __name__ == "__main__":
-    t1 = time.time()
+    
     main()
-    t2 = time.time()
-    print(f"Total time: {t2 - t1:.4f} seconds")
+    
 
     pixels_np = pixels.to_numpy()
 

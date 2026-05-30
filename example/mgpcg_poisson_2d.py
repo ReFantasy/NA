@@ -1,5 +1,5 @@
 """
-Conjugate Gradient (CG) method for solving the 2D Poisson equation on the square domain (-1,1)x(-1,1) with zero Dirichlet boundary conditions.
+Multigrid Preconditioned Conjugate Gradient (CG) method for solving the 2D Poisson equation on the square domain (-1,1)x(-1,1) with zero Dirichlet boundary conditions.
 The Poisson equation is given by:
     -Δu = f
 where Δ is the Laplace operator, u is the unknown function we want to solve for, and f is the source term. In this example, we set f(x) = 1.
@@ -15,17 +15,19 @@ ti.init(default_fp=real, arch=ti.x64, kernel_profiler=False)
 
 
 n_mg_levels = 4
-pre_and_post_smoothing = 4
+pre_and_post_smoothing = 2
 bottom_smoothing = 500
-# grid parameters
-N_ext = 4  # number of ghost cells for boundary conditions
-N = 128 * N_ext
-N_TOL = N + N_ext * 2
 
+N = 128*4
 N_gui = 512  # gui resolution
+
 pixels = ti.field(dtype=real, shape=(N_gui, N_gui))  # image buffer
-h = 2.0 / (N - 1)  # grid spacing
+h = 2.0 / N  # grid spacing
+
 square_h_inv = 1.0 / (h * h)  # precompute for efficiency
+
+N_ext = N // 2  # number of ext cells set so that that total grid size is still power of 2
+N_tot = 2 * N
 
 # setup sparse simulation data arrays
 x = ti.field(dtype=real)  # solution
@@ -36,13 +38,13 @@ alpha = ti.field(dtype=real)  # step size
 beta = ti.field(dtype=real)  # step size
 sum_ = ti.field(dtype=real)  # storage for reductions
 
-ti.root.pointer(ti.ij, [N // N_ext + 2]).dense(ti.ij, N_ext).place(x, p, Ap)
+ti.root.pointer(ti.ij, [N_tot // 4]).dense(ti.ij, 4).place(x, p, Ap)
 ti.root.place(alpha, beta, sum_)
 
 r = [ti.field(dtype=real) for _ in range(n_mg_levels)]  # residual
 z = [ti.field(dtype=real) for _ in range(n_mg_levels)]  # M^-1 r
 for lvl in range(n_mg_levels):
-    ti.root.pointer(ti.ij, [N // (N_ext * 2**lvl) + 2]).dense(ti.ij, N_ext).place(r[lvl], z[lvl])
+    ti.root.pointer(ti.ij, [N_tot // (4 * 2**lvl)]).dense(ti.ij, 4).place(r[lvl], z[lvl])
 
 
 @ti.kernel
@@ -78,9 +80,9 @@ def update_p():
 
 @ti.kernel
 def init():
-    for i, j in ti.ndrange((N_ext, N_ext + N), (N_ext, N_ext + N)):
-        xl = (i - N_ext) * h - 1.0
-        yl = (j - N_ext) * h - 1.0
+    for i, j in ti.ndrange((N_ext, N_tot - N_ext), (N_ext, N_tot - N_ext)):
+        # xl = (i - N_ext) * h - 1.0
+        # yl = (j - N_ext) * h - 1.0
         # x[i, j] = ti.sin(2.0 * np.pi * xl) * ti.sin(2.0 * np.pi * yl)
 
         x[i, j] = 0.0
@@ -147,10 +149,15 @@ def apply_preconditioner():
 
 @ti.kernel
 def paint():
+    # for i, j in pixels:
+    #     ii = int(i * N / N_gui)
+    #     jj = int(j * N / N_gui)
+    #     pixels[i, j] = x[ii + N_ext, jj + N_ext]  # * 2.0
+
     for i, j in pixels:
-        ii = int(i * N / N_gui)
-        jj = int(j * N / N_gui)
-        pixels[i, j] = x[ii + N_ext, jj + N_ext]  # * 2.0
+        ii = int(i * N / N_gui) + N_ext
+        jj = int(j * N / N_gui) + N_ext
+        pixels[i, j] = x[ii, jj] 
 
 
 gui = ti.GUI("Multigrid Preconditioned Conjugate Gradient (MGPCG)", res=(N_gui, N_gui))
@@ -173,6 +180,7 @@ def main():
     rTz_old = sum_[None]
 
     k = 0
+    t1 = time.time()
     while gui.running:
         compute_Ap()
 
@@ -190,7 +198,7 @@ def main():
         sum_[None] = 0.0
         reduce(r[0], r[0])
         rTr = sum_[None]
-        # print(f"iter {k}: residual: {rTr:.6e}")
+        #print(f"iter {k}: residual: {rTr:.6e}")
         if rTr < 2e-8:  # rTr_initial * 1e-12:
             print(f"Converged! Final residual: {rTr:.6e}, initial residual: {rTr_initial:.6e}")
             break
@@ -214,13 +222,15 @@ def main():
         paint()
         gui.set_image(pixels)
         gui.show()
+        
+    t2 = time.time()
+    print(f"Total time: {t2 - t1:.4f} seconds")
 
 
 if __name__ == "__main__":
-    t1 = time.time()
+    
     main()
-    t2 = time.time()
-    print(f"Total time: {t2 - t1:.4f} seconds")
+    
 
     pixels_np = pixels.to_numpy()
 
