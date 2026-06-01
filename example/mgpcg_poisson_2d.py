@@ -115,13 +115,13 @@ def restrict(l: ti.template()):
             r[l][i, j]
             - (4.0 * z[l][i, j] - z[l][i + 1, j] - z[l][i - 1, j] - z[l][i, j + 1] - z[l][i, j - 1]) * square_h_inv
         )
-        r[l + 1][i // 2, j // 2] += res * 0.5
+        r[l + 1][i // 2, j // 2] += res * 0.25
 
 
 @ti.kernel
 def prolongate(l: ti.template()):
     for I in ti.grouped(z[l]):
-        z[l][I] = z[l + 1][I // 2]
+        z[l][I] = z[l + 1][I // 2] * 4.0
 
 
 def apply_preconditioner():
@@ -198,7 +198,7 @@ def main():
         sum_[None] = 0.0
         reduce(r[0], r[0])
         rTr = sum_[None]
-        # print(f"iter {k}: residual: {rTr:.6e}")
+        print(f"iter {k}: residual: {rTr:.6e}")
         if rTr < 2e-8:  # rTr_initial * 1e-12:
             print(f"Converged! Final residual: {rTr:.6e}, initial residual: {rTr_initial:.6e}")
             break

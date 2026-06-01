@@ -115,7 +115,7 @@ def main():
         reduce(r, r)
         rTr = sum_[None]
 
-        # print(f"iter {k}: residual: {rTr:.6e}")
+        print(f"iter {k}: residual: {rTr:.6e}")
         if rTr < 2e-8:  # rTr_initial * 1e-12:
             print(f"Converged! Final residual: {rTr:.6e}, initial residual: {rTr_initial:.6e}")
             break
