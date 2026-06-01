@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import time
 
 real = ti.f32
-ti.init(default_fp=real, arch=ti.x64, kernel_profiler=False)
+ti.init(default_fp=real, arch=ti.cpu)
 
 show_gui = False
 
