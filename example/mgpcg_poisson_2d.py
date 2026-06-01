@@ -11,12 +11,12 @@ import matplotlib.pyplot as plt
 import time
 
 real = ti.f32
-ti.init(default_fp=real, arch=ti.x64, kernel_profiler=False)
+ti.init(default_fp=real, arch=ti.cpu, kernel_profiler=False)
 
 
 n_mg_levels = 4
-pre_and_post_smoothing = 2
-bottom_smoothing = 100
+pre_and_post_smoothing = 4
+bottom_smoothing = 200
 
 N = 128 * 4
 N_gui = 512  # gui resolution
@@ -43,8 +43,9 @@ ti.root.place(alpha, beta, sum_)
 
 r = [ti.field(dtype=real) for _ in range(n_mg_levels)]  # residual
 z = [ti.field(dtype=real) for _ in range(n_mg_levels)]  # M^-1 r
+z_temp = [ti.field(dtype=real) for _ in range(n_mg_levels)]
 for lvl in range(n_mg_levels):
-    ti.root.pointer(ti.ij, [N_tot // (4 * 2**lvl)]).dense(ti.ij, 4).place(r[lvl], z[lvl])
+    ti.root.pointer(ti.ij, [N_tot // (4 * 2**lvl)]).dense(ti.ij, 4).place(r[lvl], z[lvl], z_temp[lvl])
 
 
 @ti.kernel
@@ -94,12 +95,36 @@ def init():
 
 
 @ti.kernel
-def smooth(l: ti.template(), phase: ti.template()):
+def rbgs(l: ti.template(), phase: ti.template()):
     # solve A z = r approximately by performing a few iterations of red-black Gauss-Seidel relaxation, where A is the 32-D Laplace operator
     # phase = red/black Gauss-Seidel phase
     for i, j in r[l]:
         if (i + j) & 1 == phase:
             z[l][i, j] = (r[l][i, j] * h * h + z[l][i + 1, j] + z[l][i - 1, j] + z[l][i, j + 1] + z[l][i, j - 1]) / 4.0
+
+
+def smooth_rbgs(l: ti.template(), dir: int):
+    if dir == 0:
+        rbgs(l, 0)  # red-black Gauss-Seidel phase 0
+        rbgs(l, 1)  # red-black Gauss-Seidel phase 1
+    else:
+        rbgs(l, 1)  # red-black Gauss-Seidel phase 1
+        rbgs(l, 0)  # red-black Gauss-Seidel phase 0
+
+
+@ti.kernel
+def smooth_jacobi(l: ti.template()):
+    # dampened Jacobi relaxation, which is more parallelizable than Gauss-Seidel
+    # 第一步：计算 Jacobi 更新并存入临时场
+    omega = 0.667  # 阻尼因子，通常在 (0,1) 之间
+    for i, j in r[l]:
+        # 纯 Jacobi 的一步估计值: x_star = (b - (L+U)x_old) / D
+        jacobi_val = (r[l][i, j] * h * h + z[l][i + 1, j] + z[l][i - 1, j] + z[l][i, j + 1] + z[l][i, j - 1]) / 4.0
+        # 阻尼更新公式: x_new = (1 - omega) * x_old + omega * x_star
+        z_temp[l][i, j] = (1.0 - omega) * z[l][i, j] + omega * jacobi_val
+    # 第二步：将新结果覆盖回 z[l]
+    for i, j in z[l]:
+        z[l][i, j] = z_temp[l][i, j]
 
 
 @ti.kernel
@@ -123,31 +148,26 @@ def apply_preconditioner():
 
     for l in range(n_mg_levels - 1):
         for _ in range(pre_and_post_smoothing << l):
-            smooth(l, 0)
-            smooth(l, 1)
+            smooth_rbgs(l, 0)
+            # smooth_jacobi(l)
         z[l + 1].fill(0)
         r[l + 1].fill(0)
         restrict(l)
 
     # solve A z = r approximately on the coarsest level by performing a few iterations of red-black Gauss-Seidel relaxation
     for _ in range(bottom_smoothing):
-        smooth(n_mg_levels - 1, 0)
-        smooth(n_mg_levels - 1, 1)
+        smooth_rbgs(n_mg_levels - 1, 0)
+        # smooth_jacobi(n_mg_levels - 1)
 
     for l in reversed(range(n_mg_levels - 1)):
         prolongate(l)
         for i in range(pre_and_post_smoothing << l):
-            smooth(l, 1)
-            smooth(l, 0)
+            smooth_rbgs(l, 1)
+            # smooth_jacobi(l)
 
 
 @ti.kernel
 def paint():
-    # for i, j in pixels:
-    #     ii = int(i * N / N_gui)
-    #     jj = int(j * N / N_gui)
-    #     pixels[i, j] = x[ii + N_ext, jj + N_ext]  # * 2.0
-
     for i, j in pixels:
         ii = int(i * N / N_gui) + N_ext
         jj = int(j * N / N_gui) + N_ext
