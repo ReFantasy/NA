@@ -13,7 +13,7 @@ import time
 real = ti.f32
 ti.init(default_fp=real, arch=ti.cpu)
 
-show_gui = True
+show_gui = False
 
 
 n_mg_levels = 4

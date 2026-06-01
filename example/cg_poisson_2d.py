@@ -13,6 +13,8 @@ import time
 real = ti.f32
 ti.init(default_fp=real, arch=ti.x64, kernel_profiler=False)
 
+show_gui = False
+
 # grid parameters
 N_ext = 4  # number of ghost cells for boundary conditions
 N = 128 * N_ext
@@ -84,7 +86,8 @@ def paint():
         pixels[i, j] = x[ii + N_ext, jj + N_ext]  # * 2.0
 
 
-gui = ti.GUI("Conjugate Gradient (CG) for 2D Poisson equation", res=(N_gui, N_gui))
+if show_gui:
+    gui = ti.GUI("Conjugate Gradient (CG) for 2D Poisson equation", res=(N_gui, N_gui))
 
 
 def main():
@@ -97,7 +100,7 @@ def main():
 
     k = 0
     t1 = time.time()
-    while gui.running:
+    while True:
         compute_Ap()
 
         sum_[None] = 0.0
@@ -128,9 +131,10 @@ def main():
         rTr_old = rTr
         k += 1
 
-        paint()
-        gui.set_image(pixels)
-        gui.show()
+        if show_gui:
+            paint()
+            gui.set_image(pixels)
+            gui.show()
 
     t2 = time.time()
     print(f"Total time: {t2 - t1:.4f} seconds")
@@ -140,22 +144,24 @@ if __name__ == "__main__":
 
     main()
 
-    pixels_np = pixels.to_numpy()
+    if show_gui:
 
-    plt.title("Conjugate Gradient (CG) for 2D Poisson equation")
-    plt.gcf().canvas.manager.set_window_title("Conjugate Gradient (CG) for 2D Poisson equation")
-    plt.rcParams["font.family"] = "Times New Roman"
+        pixels_np = pixels.to_numpy()
 
-    # 将原始 2D 数组直接传给 imshow，并指定 colormap
-    im = plt.imshow(pixels_np, cmap="viridis")
-    # 添加颜色条来显示真实的数据范围
-    plt.colorbar(im, label="solution")
+        plt.title("Conjugate Gradient (CG) for 2D Poisson equation")
+        plt.gcf().canvas.manager.set_window_title("Conjugate Gradient (CG) for 2D Poisson equation")
+        plt.rcParams["font.family"] = "Times New Roman"
 
-    plt.axis("off")
+        # 将原始 2D 数组直接传给 imshow，并指定 colormap
+        im = plt.imshow(pixels_np, cmap="viridis")
+        # 添加颜色条来显示真实的数据范围
+        plt.colorbar(im, label="solution")
 
-    # 自动调整布局，使图像和颜色条更紧凑、防止标签被截断
-    plt.tight_layout()
+        plt.axis("off")
 
-    # 保存为高清图片，dpi 即为 PPI（每英寸像素点数），通常 300 或 600 用于高清/出版
-    # plt.savefig("cg_poisson_2d.png", dpi=600)
-    plt.show()
+        # 自动调整布局，使图像和颜色条更紧凑、防止标签被截断
+        plt.tight_layout()
+
+        # 保存为高清图片，dpi 即为 PPI（每英寸像素点数），通常 300 或 600 用于高清/出版
+        # plt.savefig("cg_poisson_2d.png", dpi=600)
+        plt.show()
