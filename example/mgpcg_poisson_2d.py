@@ -16,7 +16,7 @@ ti.init(default_fp=real, arch=ti.x64, kernel_profiler=False)
 
 n_mg_levels = 4
 pre_and_post_smoothing = 2
-bottom_smoothing = 500
+bottom_smoothing = 100
 
 N = 128 * 4
 N_gui = 512  # gui resolution
@@ -94,12 +94,6 @@ def init():
 
 
 @ti.kernel
-def IdentifyM():
-    for I in ti.grouped(r[0]):
-        z[0][I] = r[0][I]  # M = I, no preconditioning
-
-
-@ti.kernel
 def smooth(l: ti.template(), phase: ti.template()):
     # solve A z = r approximately by performing a few iterations of red-black Gauss-Seidel relaxation, where A is the 32-D Laplace operator
     # phase = red/black Gauss-Seidel phase
@@ -121,7 +115,7 @@ def restrict(l: ti.template()):
 @ti.kernel
 def prolongate(l: ti.template()):
     for I in ti.grouped(z[l]):
-        z[l][I] = z[l + 1][I // 2] * 4.0
+        z[l][I] += z[l + 1][I // 2] * 4.0
 
 
 def apply_preconditioner():
@@ -204,7 +198,6 @@ def main():
             break
 
         # z = M^{-1} r, where M is the multigrid preconditioner
-        # IdentifyM()
         apply_preconditioner()
 
         sum_[None] = 0.0
