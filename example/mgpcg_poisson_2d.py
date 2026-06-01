@@ -11,7 +11,9 @@ import matplotlib.pyplot as plt
 import time
 
 real = ti.f32
-ti.init(default_fp=real, arch=ti.cpu, kernel_profiler=False)
+ti.init(default_fp=real, arch=ti.cpu)
+
+show_gui = True
 
 
 n_mg_levels = 4
@@ -33,13 +35,14 @@ N_tot = 2 * N
 x = ti.field(dtype=real)  # solution
 p = ti.field(dtype=real)  # conjugate gradient
 Ap = ti.field(dtype=real)  # matrix-vector product
+ti.root.pointer(ti.ij, [N_tot // 4]).dense(ti.ij, 4).place(x, p, Ap)
+
 
 alpha = ti.field(dtype=real)  # step size
 beta = ti.field(dtype=real)  # step size
 sum_ = ti.field(dtype=real)  # storage for reductions
-
-ti.root.pointer(ti.ij, [N_tot // 4]).dense(ti.ij, 4).place(x, p, Ap)
 ti.root.place(alpha, beta, sum_)
+
 
 r = [ti.field(dtype=real) for _ in range(n_mg_levels)]  # residual
 z = [ti.field(dtype=real) for _ in range(n_mg_levels)]  # M^-1 r
@@ -82,10 +85,6 @@ def update_p():
 @ti.kernel
 def init():
     for i, j in ti.ndrange((N_ext, N_tot - N_ext), (N_ext, N_tot - N_ext)):
-        # xl = (i - N_ext) * h - 1.0
-        # yl = (j - N_ext) * h - 1.0
-        # x[i, j] = ti.sin(2.0 * np.pi * xl) * ti.sin(2.0 * np.pi * yl)
-
         x[i, j] = 0.0
         # r = b - Ax, where x = 0; therefore r = b
         r[0][i, j] = 1.0  # f(x) = 1.0 for Poisson equation with zero Dirichlet boundary conditions
@@ -174,7 +173,8 @@ def paint():
         pixels[i, j] = x[ii, jj]
 
 
-gui = ti.GUI("Multigrid Preconditioned Conjugate Gradient (MGPCG)", res=(N_gui, N_gui))
+if show_gui:
+    gui = ti.GUI("Multigrid Preconditioned Conjugate Gradient (MGPCG)", res=(N_gui, N_gui))
 
 
 def main():
@@ -195,7 +195,7 @@ def main():
 
     k = 0
     t1 = time.time()
-    while gui.running:
+    while True:
         compute_Ap()
 
         sum_[None] = 0.0
@@ -232,9 +232,10 @@ def main():
         rTz_old = rTz
         k += 1
 
-        paint()
-        gui.set_image(pixels)
-        gui.show()
+        if show_gui:
+            paint()
+            gui.set_image(pixels)
+            gui.show()
 
     t2 = time.time()
     print(f"Total time: {t2 - t1:.4f} seconds")
@@ -244,22 +245,23 @@ if __name__ == "__main__":
 
     main()
 
-    pixels_np = pixels.to_numpy()
+    if show_gui:
+        pixels_np = pixels.to_numpy()
 
-    plt.title("Multigrid Preconditioned Conjugate Gradient (MGPCG)")
-    plt.gcf().canvas.manager.set_window_title("Multigrid Preconditioned Conjugate Gradient (MGPCG)")
-    plt.rcParams["font.family"] = "Times New Roman"
+        plt.title("Multigrid Preconditioned Conjugate Gradient (MGPCG)")
+        plt.gcf().canvas.manager.set_window_title("Multigrid Preconditioned Conjugate Gradient (MGPCG)")
+        plt.rcParams["font.family"] = "Times New Roman"
 
-    # 将原始 2D 数组直接传给 imshow，并指定 colormap
-    im = plt.imshow(pixels_np, cmap="viridis")
-    # 添加颜色条来显示真实的数据范围
-    plt.colorbar(im, label="solution")
+        # 将原始 2D 数组直接传给 imshow，并指定 colormap
+        im = plt.imshow(pixels_np, cmap="viridis")
+        # 添加颜色条来显示真实的数据范围
+        plt.colorbar(im, label="solution")
 
-    plt.axis("off")
+        plt.axis("off")
 
-    # 自动调整布局，使图像和颜色条更紧凑、防止标签被截断
-    plt.tight_layout()
+        # 自动调整布局，使图像和颜色条更紧凑、防止标签被截断
+        plt.tight_layout()
 
-    # 保存为高清图片，dpi 即为 PPI（每英寸像素点数），通常 300 或 600 用于高清/出版
-    # plt.savefig("mgpcg_poisson_2d.png", dpi=600)
-    plt.show()
+        # 保存为高清图片，dpi 即为 PPI（每英寸像素点数），通常 300 或 600 用于高清/出版
+        # plt.savefig("mgpcg_poisson_2d.png", dpi=600)
+        plt.show()
