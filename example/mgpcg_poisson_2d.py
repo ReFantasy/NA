@@ -52,6 +52,17 @@ for lvl in range(n_mg_levels):
 
 
 @ti.kernel
+def init():
+    for i, j in ti.ndrange((N_ext, N_tot - N_ext), (N_ext, N_tot - N_ext)):
+        x[i, j] = 0.0
+        # r = b - Ax, where x = 0; therefore r = b
+        r[0][i, j] = 1.0  # f(x) = 1.0 for Poisson equation with zero Dirichlet boundary conditions
+        z[0][i, j] = 0.0  # initial preconditioned residual z0 = r0
+        p[i, j] = 0.0  # initial search direction p0 = r0
+        Ap[i, j] = 0.0
+
+
+@ti.kernel
 def reduce(p_: ti.template(), q_: ti.template()):
     for I in ti.grouped(p_):
         sum_[None] += p_[I] * q_[I]
@@ -80,17 +91,6 @@ def update_r():
 def update_p():
     for I in ti.grouped(p):
         p[I] = z[0][I] + beta[None] * p[I]
-
-
-@ti.kernel
-def init():
-    for i, j in ti.ndrange((N_ext, N_tot - N_ext), (N_ext, N_tot - N_ext)):
-        x[i, j] = 0.0
-        # r = b - Ax, where x = 0; therefore r = b
-        r[0][i, j] = 1.0  # f(x) = 1.0 for Poisson equation with zero Dirichlet boundary conditions
-        z[0][i, j] = 0.0  # initial preconditioned residual z0 = r0
-        p[i, j] = 0.0  # initial search direction p0 = r0
-        Ap[i, j] = 0.0
 
 
 @ti.kernel
@@ -153,14 +153,15 @@ def apply_preconditioner():
         r[l + 1].fill(0)
         restrict(l)
 
-    # solve A z = r approximately on the coarsest level by performing a few iterations of red-black Gauss-Seidel relaxation
+    # solve A z = r approximately on the coarsest level
+    # by performing a few iterations of red-black Gauss-Seidel relaxation
     for _ in range(bottom_smoothing):
         smooth_rbgs(n_mg_levels - 1, 0)
         # smooth_jacobi(n_mg_levels - 1)
 
     for l in reversed(range(n_mg_levels - 1)):
         prolongate(l)
-        for i in range(pre_and_post_smoothing << l):
+        for _ in range(pre_and_post_smoothing << l):
             smooth_rbgs(l, 1)
             # smooth_jacobi(l)
 
