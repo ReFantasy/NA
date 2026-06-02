@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(
     description="Multigrid Preconditioned Conjugate Gradient (CG) method for solving the 2D Poisson equation."
 )
 parser.add_argument("-s", "--show-gui", action="store_true", help="Show the GUI with the solution.")
-parser.add_argument("-a", "--arch", type=str, default="CPU", help="Taichi architecture to use (e.g., 'cpu', 'gpu', 'cuda', 'vulkan', 'metal').")
+parser.add_argument("-a", "--arch", type=str, default="CPU", help="Taichi architecture to use (e.g., 'cpu', 'gpu', 'cuda', 'vulkan', 'metal', 'opengl').")
 parser.add_argument("-l", "--mg-levels", type=int, default=8, help="Number of multigrid levels.")
 parser.add_argument("--pre-post-smoothing", type=int, default=3, help="Number of smoothing iterations for pre- and post-smoothing at each level (will be multiplied by 2^l for level l).")
 parser.add_argument("--bottom-smoothing", type=int, default=50, help="Number of smoothing iterations for the coarsest level solve.")
@@ -35,9 +35,11 @@ elif args.arch.lower() == "vulkan":
     ti.init(default_fp=real, arch=ti.vulkan)
 elif args.arch.lower() == "metal":
     ti.init(default_fp=real, arch=ti.metal)
+elif args.arch.lower() == "opengl":
+    ti.init(default_fp=real, arch=ti.opengl)
 else:
     raise ValueError(
-        f"Unsupported architecture: {args.arch}. Supported architectures are: 'cpu', 'gpu', 'cuda', 'vulkan', 'metal'."
+        f"Unsupported architecture: {args.arch}. Supported architectures are: 'cpu', 'gpu', 'cuda', 'vulkan', 'metal', 'opengl'."
     )
 
 # --------------------------------------------------------------------------------------------------------
