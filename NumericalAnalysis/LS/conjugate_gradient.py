@@ -205,21 +205,19 @@ if __name__ == "__main__":
     print(f"x: {x[:10]}...")  # 打印前10个元素以验证结果
     print(f"residual: {r.T @ r}, number of iterations: {k}")
 
-    print("-----------------------------------------------")
-    import eigenpy
-
-    # M = jnp.diag(jnp.diag(A))
+    # print("-----------------------------------------------")
+    # import eigenpy
+    # # M = jnp.diag(jnp.diag(A))
+    # # M = sparse.CSR.fromdense(M)
+    # ic = eigenpy.solvers.IncompleteCholesky()
+    # ic.compute(scipy.sparse.csc_matrix(A))
+    # L = ic.matrixL().todense()
+    # M = L @ L.T
     # M = sparse.CSR.fromdense(M)
 
-    ic = eigenpy.solvers.IncompleteCholesky()
-    ic.compute(scipy.sparse.csc_matrix(A))
-    L = ic.matrixL().todense()
-    M = L @ L.T
-    M = sparse.CSR.fromdense(M)
-
-    t1 = time.time()
-    x, r, k = pcg(M, A_sp, b, tol=1e-4)
-    t2 = time.time()
-    print(f"PCG method took {t2 - t1:.4f} seconds.")
-    print(f"x: {x[:10]}...")  # 打印前10个元素以验证结果
-    print(f"residual: {r.T @ r}, number of iterations: {k}")
+    # t1 = time.time()
+    # x, r, k = pcg(M, A_sp, b, tol=1e-4)
+    # t2 = time.time()
+    # print(f"PCG method took {t2 - t1:.4f} seconds.")
+    # print(f"x: {x[:10]}...")  # 打印前10个元素以验证结果
+    # print(f"residual: {r.T @ r}, number of iterations: {k}")
