@@ -19,6 +19,7 @@ parser.add_argument("-a", "--arch", type=str, default="CPU", help="Taichi archit
 parser.add_argument("-l", "--mg-levels", type=int, default=8, help="Number of multigrid levels.")
 parser.add_argument("--pre-post-smoothing", type=int, default=3, help="Number of smoothing iterations for pre- and post-smoothing at each level (will be multiplied by 2^l for level l).")
 parser.add_argument("--bottom-smoothing", type=int, default=50, help="Number of smoothing iterations for the coarsest level solve.")
+parser.add_argument("-m", "--smoothing-method", type=str, default="rbgs", choices=["rbgs", "jacobi"], help="Smoothing method to use: 'rbgs' for red-black Gauss-Seidel, 'jacobi' for dampened Jacobi.")
 parser.add_argument("-N", "--N", type=int, default=128 * 8, help="Grid resolution (N x N).")
 args = parser.parse_args()
 
@@ -151,6 +152,13 @@ def smooth_jacobi(l: ti.template()):
     for i, j in ti.ndrange(z[l].shape[0] - 2 * padding, z[l].shape[1] - 2 * padding):
         z[l][i, j] = z_temp[l][i, j]
 
+def smooth(l: ti.template(), dir: int, method: str = "rbgs"):
+    # you can choose either red-black Gauss-Seidel or dampened Jacobi for smoothing; 
+    # red-black Gauss-Seidel typically converges faster but is less parallelizable than Jacobi
+    if method == "rbgs":
+        smooth_rbgs(l, dir)
+    elif method == "jacobi":
+        smooth_jacobi(l)
 
 # --------------------------------------------------------------------------------------------------------
 # Multigrid V-cycle components: restriction and prolongation
@@ -181,23 +189,20 @@ def apply_preconditioner():
 
     for l in range(mg_levels - 1):
         for _ in range(pre_and_post_smoothing << l):
-            smooth_rbgs(l, 0)
-            # smooth_jacobi(l)
+            smooth(l, 0, method=args.smoothing_method)
         z[l + 1].fill(0)
         r[l + 1].fill(0)
         restrict(l)
 
     # solve A z = r approximately on the coarsest level by performing a few iterations of red-black Gauss-Seidel relaxation
     for _ in range(bottom_smoothing):
-        smooth_rbgs(mg_levels - 1, 0)
-        # smooth_jacobi(mg_levels - 1)
+        smooth(mg_levels - 1, 0, method=args.smoothing_method)
 
     for l in reversed(range(mg_levels - 1)):
         prolongate(l)
         for i in range(pre_and_post_smoothing << l):
-            smooth_rbgs(l, 1)
-            # smooth_jacobi(l)
-
+            smooth(l, 1, method=args.smoothing_method)
+            
 
 # --------------------------------------------------------------------------------------------------------
 # Initialization and GUI setup
