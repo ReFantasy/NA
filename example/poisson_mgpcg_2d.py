@@ -21,10 +21,13 @@ parser.add_argument("--pre-post-smoothing", type=int, default=3, help="Number of
 parser.add_argument("--bottom-smoothing", type=int, default=50, help="Number of smoothing iterations for the coarsest level solve.")
 parser.add_argument("-m", "--smoothing-method", type=str, default="rbgs", choices=["rbgs", "jacobi"], help="Smoothing method to use: 'rbgs' for red-black Gauss-Seidel, 'jacobi' for dampened Jacobi.")
 parser.add_argument("-N", "--N", type=int, default=128 * 8, help="Grid resolution (N x N).")
+parser.add_argument('-f', "--float", type=str, default="32", choices=["32", "64"], help="Floating point precision to use: 'f32' for 32-bit, 'f64' for 64-bit.")
 args = parser.parse_args()
 
-
-real = ti.f32
+if args.float == "32":
+    real = ti.f32
+elif args.float == "64":
+    real = ti.f64
 
 if args.arch.lower() == "cpu":
     ti.init(default_fp=real, arch=ti.cpu)
@@ -202,7 +205,7 @@ def apply_preconditioner():
         prolongate(l)
         for i in range(pre_and_post_smoothing << l):
             smooth(l, 1, method=args.smoothing_method)
-            
+
 
 # --------------------------------------------------------------------------------------------------------
 # Initialization and GUI setup
