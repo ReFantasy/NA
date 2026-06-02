@@ -13,14 +13,16 @@ import time
 real = ti.f32
 ti.init(default_fp=real, arch=ti.cpu)
 
-show_gui = True
+show_gui = False
 
 
 n_mg_levels = 4
 pre_and_post_smoothing = 4
 bottom_smoothing = 200
 
-N = 128 * 4
+N = 128 * 16
+field_offset = 5
+
 N_gui = 512  # gui resolution
 
 pixels = ti.field(dtype=real, shape=(N_gui, N_gui))  # image buffer
@@ -28,9 +30,9 @@ h = 2.0 / N  # grid spacing
 
 square_h_inv = 1.0 / (h * h)  # precompute for efficiency
 
-x = ti.field(dtype=real, shape=(N, N))
-p = ti.field(dtype=real, shape=(N, N))
-Ap = ti.field(dtype=real, shape=(N, N))
+x = ti.field(dtype=real, shape=(N + 2 * field_offset, N + 2 * field_offset), offset=(-field_offset, -field_offset))
+p = ti.field(dtype=real, shape=(N + 2 * field_offset, N + 2 * field_offset), offset=(-field_offset, -field_offset))
+Ap = ti.field(dtype=real, shape=(N + 2 * field_offset, N + 2 * field_offset), offset=(-field_offset, -field_offset))
 
 
 alpha = ti.field(dtype=real, shape=())  # step size
@@ -40,63 +42,62 @@ sum_ = ti.field(dtype=real, shape=())  # storage for reductions
 
 r, z, z_temp = [], [], []
 for lvl in range(n_mg_levels):
-    size = N // (2**lvl)
-    r_lvl = ti.field(dtype=real, shape=(size, size))
-    z_lvl = ti.field(dtype=real, shape=(size, size))
-    z_temp_lvl = ti.field(dtype=real, shape=(size, size))
+    size = N // (2**lvl) + 2 * field_offset
+    r_lvl = ti.field(dtype=real, shape=(size, size), offset=(-field_offset, -field_offset))
+    z_lvl = ti.field(dtype=real, shape=(size, size), offset=(-field_offset, -field_offset))
+    z_temp_lvl = ti.field(dtype=real, shape=(size, size), offset=(-field_offset, -field_offset))
     r.append(r_lvl)
     z.append(z_lvl)
     z_temp.append(z_temp_lvl)
 
 
-@ti.func
-def idx(tensor, N, i, j):
-    v = 0.0
-    if i < 0 or i >= N or j < 0 or j >= N:
-        v = 0.0
-    else:
-        v = tensor[i, j]
-    return v
+# @ti.func
+# def idx(tensor, N, i, j):
+#     v = 0.0
+#     if i < 0 or i >= N or j < 0 or j >= N:
+#         v = 0.0
+#     else:
+#         v = tensor[i, j]
+#     return v
 
 
 @ti.kernel
 def reduce(p_: ti.template(), q_: ti.template()):
-    for I in ti.grouped(p_):
-        sum_[None] += p_[I] * q_[I]
+    # for I in ti.grouped(p_):
+    #     sum_[None] += p_[I] * q_[I]
+    for i, j in ti.ndrange(N, N):
+        sum_[None] += p_[i, j] * q_[i, j]
 
 
 @ti.kernel
 def compute_Ap():
-    for i, j in Ap:
+    for i, j in ti.ndrange(N, N):
         # A is implicitly expressed as a 3-D laplace operator
-        # Ap[i, j] = (4.0 * p[i, j] - p[i + 1, j] - p[i - 1, j] - p[i, j + 1] - p[i, j - 1]) * square_h_inv
-        Ap[i, j] = (
-            4.0 * idx(p, N, i, j)
-            - idx(p, N, i + 1, j)
-            - idx(p, N, i - 1, j)
-            - idx(p, N, i, j + 1)
-            - idx(p, N, i, j - 1)
-        ) * square_h_inv
+        Ap[i, j] = (4.0 * p[i, j] - p[i + 1, j] - p[i - 1, j] - p[i, j + 1] - p[i, j - 1]) * square_h_inv
 
 
 @ti.kernel
 def update_x():
-    for I in ti.grouped(p):
-        x[I] += alpha[None] * p[I]
+    # for I in ti.grouped(p):
+    #     x[I] += alpha[None] * p[I]
+    for i, j in ti.ndrange(N, N):
+        x[i, j] += alpha[None] * p[i, j]
 
 
 @ti.kernel
 def update_r():
-    for I in ti.grouped(p):
-        r[0][I] -= alpha[None] * Ap[I]
-    # for i, j in p:
-    #     r[0][i, j] -= alpha[None] * idx(Ap, N, i, j)
+    # for I in ti.grouped(p):
+    #     r[0][I] -= alpha[None] * Ap[I]
+    for i, j in ti.ndrange(N, N):
+        r[0][i, j] -= alpha[None] * Ap[i, j]
 
 
 @ti.kernel
 def update_p():
-    for I in ti.grouped(p):
-        p[I] = z[0][I] + beta[None] * p[I]
+    # for I in ti.grouped(p):
+    #     p[I] = z[0][I] + beta[None] * p[I]
+    for i, j in ti.ndrange(N, N):
+        p[i, j] = z[0][i, j] + beta[None] * p[i, j]
 
 
 @ti.kernel
@@ -121,16 +122,19 @@ def init():
 def rbgs(l: ti.template(), phase: ti.template()):
     # solve A z = r approximately by performing a few iterations of red-black Gauss-Seidel relaxation, where A is the 32-D Laplace operator
     # phase = red/black Gauss-Seidel phase
-    for i, j in r[l]:
+    # for i, j in r[l]:
+    #     if (i + j) & 1 == phase:
+    #         z[l][i, j] = (r[l][i, j] * h * h + z[l][i + 1, j] + z[l][i - 1, j] + z[l][i, j + 1] + z[l][i, j - 1]) / 4.0
+    # z[l][i, j] = (
+    #     r[l][i, j] * h * h
+    #     + idx(z[l], r[l].shape[0], i + 1, j)
+    #     + idx(z[l], r[l].shape[0], i - 1, j)
+    #     + idx(z[l], r[l].shape[0], i, j + 1)
+    #     + idx(z[l], r[l].shape[0], i, j - 1)
+    # ) / 4.0
+    for i, j in ti.ndrange(r[l].shape[0] - 2 * field_offset, r[l].shape[1] - 2 * field_offset):
         if (i + j) & 1 == phase:
-            # z[l][i, j] = (r[l][i, j] * h * h + z[l][i + 1, j] + z[l][i - 1, j] + z[l][i, j + 1] + z[l][i, j - 1]) / 4.0
-            z[l][i, j] = (
-                r[l][i, j] * h * h
-                + idx(z[l], r[l].shape[0], i + 1, j)
-                + idx(z[l], r[l].shape[0], i - 1, j)
-                + idx(z[l], r[l].shape[0], i, j + 1)
-                + idx(z[l], r[l].shape[0], i, j - 1)
-            ) / 4.0
+            z[l][i, j] = (r[l][i, j] * h * h + z[l][i + 1, j] + z[l][i - 1, j] + z[l][i, j + 1] + z[l][i, j - 1]) / 4.0
 
 
 def smooth_rbgs(l: ti.template(), dir: int):
@@ -159,23 +163,29 @@ def smooth_jacobi(l: ti.template()):
 
 @ti.kernel
 def restrict(l: ti.template()):
-    for i, j in r[l]:
-        # res = (
-        #     r[l][i, j]
-        #     - (4.0 * z[l][i, j] - z[l][i + 1, j] - z[l][i - 1, j] - z[l][i, j + 1] - z[l][i, j - 1]) * square_h_inv
-        # )
+    # for i, j in r[l]:
+    #     res = (
+    #         r[l][i, j]
+    #         - (4.0 * z[l][i, j] - z[l][i + 1, j] - z[l][i - 1, j] - z[l][i, j + 1] - z[l][i, j - 1]) * square_h_inv
+    #     )
+    #     # res = (
+    #     #     r[l][i, j]
+    #     #     - (
+    #     #         4.0 * idx(z[l], r[l].shape[0], i, j)
+    #     #         - idx(z[l], r[l].shape[0], i + 1, j)
+    #     #         - idx(z[l], r[l].shape[0], i - 1, j)
+    #     #         - idx(z[l], r[l].shape[0], i, j + 1)
+    #     #         - idx(z[l], r[l].shape[0], i, j - 1)
+    #     #     )
+    #     #     * square_h_inv
+    #     # )
+
+    #     r[l + 1][i // 2, j // 2] += res * 0.25
+    for i, j in ti.ndrange(r[l].shape[0] - 2 * field_offset, r[l].shape[1] - 2 * field_offset):
         res = (
             r[l][i, j]
-            - (
-                4.0 * idx(z[l], r[l].shape[0], i, j)
-                - idx(z[l], r[l].shape[0], i + 1, j)
-                - idx(z[l], r[l].shape[0], i - 1, j)
-                - idx(z[l], r[l].shape[0], i, j + 1)
-                - idx(z[l], r[l].shape[0], i, j - 1)
-            )
-            * square_h_inv
+            - (4.0 * z[l][i, j] - z[l][i + 1, j] - z[l][i - 1, j] - z[l][i, j + 1] - z[l][i, j - 1]) * square_h_inv
         )
-
         r[l + 1][i // 2, j // 2] += res * 0.25
 
 
@@ -183,6 +193,8 @@ def restrict(l: ti.template()):
 def prolongate(l: ti.template()):
     for I in ti.grouped(z[l]):
         z[l][I] += z[l + 1][I // 2] * 4.0
+    # for i, j in ti.ndrange(z[l].shape[0]-2*field_offset, z[l].shape[1]-2*field_offset):
+    #     z[l][i, j] += z[l + 1][i // 2, j // 2] * 4.0
 
 
 def apply_preconditioner():
